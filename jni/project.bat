@@ -1,0 +1,1 @@
+shellexecute "main.c core.c object.c menu.c shader.c defs.h"
