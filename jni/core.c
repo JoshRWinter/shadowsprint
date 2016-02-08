@@ -9,7 +9,9 @@ int core(struct state *state){
 		state->showmenu=false;
 	}
 	if(state->back){
-		ANativeActivity_finish(state->app->activity);
+		state->back=false;
+		state->showmenu=true;
+		return core(state);
 	}
 	if(state->lbuttonstate=pointing(state->pointer,&state->lbutton)){
 		state->player.base.x-=0.1f;

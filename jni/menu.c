@@ -10,7 +10,7 @@ int menu_main(struct state *state){
 	const float btopoffset=-3.85f;
 	struct button playbutton={{bleftoffset,btopoffset,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Play",false};
 	struct button abootbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.25f)),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Aboot",false};
-	struct button configbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.25f)*2.0f),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Configuration",false};
+	struct button configbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.25f)*2.0f),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Settings",false};
 	struct button quitbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.25f)*3.0f),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Quit",false};
 	while(process(state->app)){
 		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
