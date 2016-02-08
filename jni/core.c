@@ -58,7 +58,7 @@ void render(struct state *state){
 		static char fpsstring[20];
 		if(lasttime!=time(NULL)){
 			lasttime=time(NULL);
-			sprintf(fpsstring,"fps: %d",fps);
+			sprintf(fpsstring,"Fps: %d",fps);
 			fps=0;
 		}
 		++fps;
