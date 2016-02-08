@@ -13,12 +13,40 @@ int core(struct state *state){
 		state->showmenu=true;
 		return core(state);
 	}
-	if(state->lbuttonstate=pointing(state->pointer,&state->lbutton)){
-		state->player.base.x-=0.1f;
+	
+	state->player.yv+=GRAVITY;
+	state->player.base.y+=state->player.yv;
+	state->player.base.x+=state->player.xv;
+	for(int i=0;i<BLOCK_COUNT;++i){
+		if(state->block[i].hidden)continue;
+		int side;
+		if(side=correct(&state->player.base,&state->block[i].base)){
+			if(side==COLLIDE_TOP){
+				state->player.yv=0.0f;
+				state->player.base.y=state->block[i].base.y-PLAYER_HEIGHT;
+			}
+			else if(side==COLLIDE_LEFT){
+				state->player.xv=0.0f;
+				state->player.base.x=state->block[i].base.x-PLAYER_WIDTH;
+			}
+			else{
+				state->player.xv=0.0f;
+				state->player.base.x=state->block[i].base.x+state->block[i].base.w;
+			}
+		}
 	}
-	if(state->rbuttonstate=pointing(state->pointer,&state->rbutton)){
-		state->player.base.x+=0.1f;
+	
+	state->lbuttonstate=pointing(state->pointer,&state->lbutton);
+	state->rbuttonstate=pointing(state->pointer,&state->rbutton);
+	if(state->lbuttonstate){
+		state->player.xv-=PLAYER_ACCELERATE;
+		if(state->player.xv<-PLAYER_MAX_SPEED)state->player.xv=-PLAYER_MAX_SPEED;
 	}
+	else if(state->rbuttonstate){
+		state->player.xv+=PLAYER_ACCELERATE;
+		if(state->player.xv>PLAYER_MAX_SPEED)state->player.xv=PLAYER_MAX_SPEED;
+	}
+	else zerof(&state->player.xv,PLAYER_ACCELERATE);
 	if(state->jbuttonstate=pointing(state->pointer,&state->jbutton)){
 	}
 	if(state->fbuttonstate=pointing(state->pointer,&state->fbutton)){
@@ -52,6 +80,9 @@ void render(struct state *state){
 	uidraw(state,&state->rbutton,state->rbuttonstate);
 	uidraw(state,&state->jbutton,state->jbuttonstate);
 	uidraw(state,&state->fbutton,state->fbuttonstate);
+	
+	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_PLAYER].object);
+	draw(state,&state->player.base,0);
 	
 	{
 		static int fps,lasttime=0;
@@ -98,7 +129,7 @@ void init(struct state *state){
 void reset(struct state *state){
 	newblocks(state);
 	state->player.base.x=0.0f;
-	state->player.base.y=0.0f;
+	state->player.base.y=state->block[1].base.y-PLAYER_HEIGHT;
 	state->player.xv=0.0f;
 	state->player.yv=0.0f;
 }

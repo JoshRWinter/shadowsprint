@@ -2,10 +2,11 @@
 #include <GLES2/gl2.h>
 #include <android_native_app_glue.h>
 #include <stdlib.h>
+#include <math.h>
 #include "defs.h"
 
 void newblocks(struct state *state){
-	float offset=0.0f,lasth,lasthidden;
+	float offset=-1.0f,lasth,lasthidden;
 	for(int i=0;i<BLOCK_COUNT;++i){
 		state->block[i].hidden=(lasthidden?false:onein(3))||i==0||i==BLOCK_COUNT-1;
 		if(state->block[i].hidden){
@@ -13,11 +14,11 @@ void newblocks(struct state *state){
 			state->block[i].base.w=1.25f;
 		}
 		else{
-			if(i==1)state->block[i].base.h=randomint(20,70)/10.0f;
+			if(i==1)state->block[i].base.h=randomint(20,62)/10.0f;
 			else{
 				do{
 					state->block[i].base.h=lasth+(randomint(-100,100)/100.0f);
-				}while(state->block[i].base.h>7.0f||state->block[i].base.h<2.0f);
+				}while(state->block[i].base.h>6.2f||state->block[i].base.h<2.0f);
 			}
 			state->block[i].base.w=randomint(275,450)/100.0f;
 		}
@@ -88,6 +89,23 @@ int pointing(struct crosshair *pointer,struct base *base){
 	return pointing0(pointer,base)||pointing1(pointer,base);
 }
 
+int collide(struct base *a,struct base *b){
+	return a->x+a->w>b->x&&a->x<b->x+b->w&&a->y+a->h>b->y&&a->y<b->y+b->h;
+}
+int correct(struct base *a,struct base *b){
+	if(!collide(a,b))return false;
+	float ldiff,rdiff,tdiff;
+	ldiff=fabs((a->x+a->w)-b->x);
+	rdiff=fabs(a->x-(b->x+b->w));
+	tdiff=fabs((a->y+a->h)-b->y);
+	float smallest=ldiff;
+	if(rdiff<smallest)smallest=rdiff;
+	if(tdiff<smallest)smallest=tdiff;
+	if(smallest==tdiff)return COLLIDE_TOP;
+	else if(smallest==ldiff)return COLLIDE_LEFT;
+	else return COLLIDE_RIGHT;
+}
+
 void uidraw(struct state *state,struct base *target,float sprite){
 	float size=1.0f/target->count;
 	float pos=size*sprite;
@@ -101,7 +119,7 @@ void draw(struct state *state,struct base *target,float sprite){
 	float size=1.0f/target->count;
 	float pos=size*sprite;
 	glUniform4f(state->uniform.texcoords,pos,pos+size,0.0f,1.0f);
-	glUniform2f(state->uniform.vector,target->x-state->player.base.x,target->y);
+	glUniform2f(state->uniform.vector,target->x-((state->player.base.x)+(PLAYER_WIDTH/2.0f)),target->y);
 	glUniform2f(state->uniform.size,target->w,target->h);
 	glUniform1f(state->uniform.rot,target->rot);
 	glDrawArrays(GL_TRIANGLE_STRIP,0,4);

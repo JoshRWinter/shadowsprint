@@ -3,6 +3,10 @@
 #define PI 3.14159f
 #define PI2 (2.0f*PI)
 #define TEX_MODE "110"
+#define COLLIDE_RIGHT 1
+#define COLLIDE_TOP 2
+#define COLLIDE_LEFT 3
+#define GRAVITY 0.02f
 
 #define TID_PLAYER 0
 #define TID_ENEMY 1
@@ -16,8 +20,10 @@ struct base{
 	float x,y,w,h,rot,count;
 };
 
-#define PLAYER_WIDTH 1.0f
-#define PLAYER_HEIGHT 2.0f
+#define PLAYER_MAX_SPEED 0.1f
+#define PLAYER_ACCELERATE 0.006f
+#define PLAYER_WIDTH 1.0125f
+#define PLAYER_HEIGHT 1.3875f
 struct player{
 	struct base base;
 	float xv,yv;
@@ -78,4 +84,6 @@ void draw(struct state*,struct base*,float);
 int menu_main(struct state*);
 int menu_message(struct state*,const char*,const char*,int*);
 
+int collide(struct base*,struct base*);
+int correct(struct base*,struct base*);
 void newblocks(struct state*);
