@@ -36,6 +36,20 @@ int core(struct state *state){
 			}
 		}
 	}
+	if(!state->player.canjump){
+		state->player.frametimer=0;
+		state->player.frame=6;
+	}
+	else if(state->player.xv!=0.0f){
+		if(state->player.frametimer++==PLAYER_FRAME_TIMER){
+			state->player.frametimer=0;
+			if(++state->player.frame>5)state->player.frame=1;
+		}
+	}
+	else{
+		state->player.frametimer=0;
+		state->player.frame=0;
+	}
 	
 	state->lbuttonstate=pointing(state->pointer,&state->lbutton);
 	state->rbuttonstate=pointing(state->pointer,&state->rbutton);
@@ -87,7 +101,7 @@ void render(struct state *state){
 	uidraw(state,&state->fbutton,state->fbuttonstate);
 	
 	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_PLAYER].object);
-	draw(state,&state->player.base,0);
+	draw(state,&state->player.base,state->player.frame);
 	
 	{
 		static int fps,lasttime=0;
@@ -125,6 +139,8 @@ void init(struct state *state){
 	state->player.base.h=PLAYER_HEIGHT;
 	state->player.base.rot=0.0f;
 	state->player.base.count=8.0f;
+	state->player.frame=0;
+	state->player.frametimer=0;
 	state->lava.x=state->rect.left;
 	state->lava.y=3.75f;
 	state->lava.w=state->rect.right*2.0f;

@@ -24,6 +24,7 @@ struct base{
 };
 
 #define PLAYER_JUMP -0.3f
+#define PLAYER_FRAME_TIMER 4
 #define PLAYER_MAX_SPEED 0.1f
 #define PLAYER_ACCELERATE 0.01f
 #define PLAYER_WIDTH 1.0125f
@@ -31,7 +32,7 @@ struct base{
 struct player{
 	struct base base;
 	float xv,yv;
-	int lives,canjump;
+	int lives,canjump,frame,frametimer;
 };
 
 #define BLOCK_COUNT 40
