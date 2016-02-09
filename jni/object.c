@@ -118,10 +118,13 @@ void uidraw(struct state *state,struct base *target,float sprite){
 	glUniform1f(state->uniform.rot,target->rot);
 	glDrawArrays(GL_TRIANGLE_STRIP,0,4);
 }
-void draw(struct state *state,struct base *target,float sprite){
+void draw(struct state *state,struct base *target,float sprite,int xinvert){
 	float size=1.0f/target->count;
 	float pos=size*sprite;
-	glUniform4f(state->uniform.texcoords,pos,pos+size,0.0f,1.0f);
+	if(!xinvert)
+		glUniform4f(state->uniform.texcoords,pos,pos+size,0.0f,1.0f);
+	else
+		glUniform4f(state->uniform.texcoords,pos+size,pos,0.0f,1.0f);
 	glUniform2f(state->uniform.vector,target->x-((state->player.base.x)+(PLAYER_WIDTH/2.0f))-2.5f,target->y);
 	glUniform2f(state->uniform.size,target->w,target->h);
 	glUniform1f(state->uniform.rot,target->rot);

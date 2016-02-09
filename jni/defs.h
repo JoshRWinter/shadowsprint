@@ -32,7 +32,7 @@ struct base{
 struct player{
 	struct base base;
 	float xv,yv;
-	int lives,canjump,frame,frametimer;
+	int lives,canjump,frame,frametimer,xinvert;
 };
 
 #define BLOCK_COUNT 40
@@ -85,7 +85,7 @@ int buttonprocess(struct state*,struct button*);
 int buttondraw(struct state*,struct button*);
 void buttondrawtext(ftfont*,struct button*);
 void uidraw(struct state*,struct base*,float);
-void draw(struct state*,struct base*,float);
+void draw(struct state*,struct base*,float,int);
 int menu_main(struct state*);
 int menu_message(struct state*,const char*,const char*,int*);
 

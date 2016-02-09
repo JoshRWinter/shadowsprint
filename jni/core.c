@@ -15,6 +15,8 @@ int core(struct state *state){
 	}
 	
 	state->player.yv+=GRAVITY;
+	if(state->player.xv>0.0f)state->player.xinvert=false;
+	else if(state->player.xv<0.0f)state->player.xinvert=true;
 	state->player.base.y+=state->player.yv;
 	state->player.base.x+=state->player.xv;
 	for(int i=0;i<BLOCK_COUNT;++i){
@@ -85,7 +87,7 @@ void render(struct state *state){
 	
 	glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
 	for(int i=0;i<BLOCK_COUNT;++i){
-		if(!state->block[i].hidden)draw(state,&state->block[i].base,0);
+		if(!state->block[i].hidden)draw(state,&state->block[i].base,0,false);
 		/*else{
 			glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,0.3f);
 			draw(state,&state->block[i].base,0);
@@ -101,7 +103,7 @@ void render(struct state *state){
 	uidraw(state,&state->fbutton,state->fbuttonstate);
 	
 	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_PLAYER].object);
-	draw(state,&state->player.base,state->player.frame);
+	draw(state,&state->player.base,state->player.frame,state->player.xinvert);
 	
 	{
 		static int fps,lasttime=0;
@@ -137,10 +139,7 @@ void init(struct state *state){
 	state->buttonframe=(struct base){state->rect.right-3.8125f,state->rect.top,3.8125f,state->rect.bottom*2.0f,0.0f,1.0f};
 	state->player.base.w=PLAYER_WIDTH;
 	state->player.base.h=PLAYER_HEIGHT;
-	state->player.base.rot=0.0f;
 	state->player.base.count=8.0f;
-	state->player.frame=0;
-	state->player.frametimer=0;
 	state->lava.x=state->rect.left;
 	state->lava.y=3.75f;
 	state->lava.w=state->rect.right*2.0f;
@@ -154,6 +153,10 @@ void reset(struct state *state){
 	state->player.base.y=state->block[1].base.y-PLAYER_HEIGHT;
 	state->player.xv=0.0f;
 	state->player.yv=0.0f;
+	state->player.frame=0;
+	state->player.frametimer=0;
+	state->player.base.rot=0.0f;
+	state->player.xinvert=false;
 	state->player.lives=3;
 	state->player.canjump=true;
 }
