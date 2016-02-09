@@ -7,6 +7,8 @@
 
 void newblocks(struct state *state){
 	float offset=-1.0f,lasth,lasthidden;
+	const float BLOCK_CEILING=6.2f;
+	const float BLOCK_FLOOR= 2.0f;
 	for(int i=0;i<BLOCK_COUNT;++i){
 		state->block[i].hidden=(lasthidden?false:onein(3))||i==0||i==BLOCK_COUNT-1;
 		if(state->block[i].hidden){
@@ -14,11 +16,11 @@ void newblocks(struct state *state){
 			state->block[i].base.w=1.25f;
 		}
 		else{
-			if(i==1)state->block[i].base.h=randomint(20,62)/10.0f;
+			if(i==1)state->block[i].base.h=randomint(BLOCK_FLOOR*10.0f,BLOCK_CEILING*10.0f)/10.0f;
 			else{
 				do{
 					state->block[i].base.h=lasth+(randomint(-100,100)/100.0f);
-				}while(state->block[i].base.h>6.2f||state->block[i].base.h<2.0f);
+				}while(state->block[i].base.h>BLOCK_CEILING||state->block[i].base.h<BLOCK_FLOOR);
 			}
 			state->block[i].base.w=randomint(275,450)/100.0f;
 		}
@@ -119,7 +121,7 @@ void draw(struct state *state,struct base *target,float sprite){
 	float size=1.0f/target->count;
 	float pos=size*sprite;
 	glUniform4f(state->uniform.texcoords,pos,pos+size,0.0f,1.0f);
-	glUniform2f(state->uniform.vector,target->x-((state->player.base.x)+(PLAYER_WIDTH/2.0f)),target->y);
+	glUniform2f(state->uniform.vector,target->x-((state->player.base.x)+(PLAYER_WIDTH/2.0f))-2.5f,target->y);
 	glUniform2f(state->uniform.size,target->w,target->h);
 	glUniform1f(state->uniform.rot,target->rot);
 	glDrawArrays(GL_TRIANGLE_STRIP,0,4);

@@ -16,12 +16,15 @@ int menu_main(struct state *state){
 		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BACKGROUND].object);
 		uidraw(state,&state->background,0);
+		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTONFRAME].object);
+		uidraw(state,&state->buttonframe,0);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(buttondraw(state,&playbutton)==BUTTON_ACTIVATE){
 			return true;
 		}
 		if(buttondraw(state,&abootbutton)==BUTTON_ACTIVATE){
 			if(!menu_message(state,"Aboot",aboottext,NULL))return false;
+			continue;
 		}
 		if(buttondraw(state,&configbutton)==BUTTON_ACTIVATE){
 			//config
@@ -51,6 +54,8 @@ int menu_message(struct state *state,const char *caption,const char *msg,int *ye
 		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BACKGROUND].object);
 		uidraw(state,&state->background,0);
+		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTONFRAME].object);
+		uidraw(state,&state->buttonframe,0);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(yesno){
 			if(buttondraw(state,&yesbutton)==BUTTON_ACTIVATE){

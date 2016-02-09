@@ -8,26 +8,30 @@
 #define COLLIDE_LEFT 3
 #define GRAVITY 0.02f
 
+// gameplay
 #define TID_PLAYER 0
 #define TID_ENEMY 1
 #define TID_BLOCK 2
 
+//ui
 #define TID_BACKGROUND 0
 #define TID_BUTTON 1
 #define TID_BUTTON2 2
+#define TID_BUTTONFRAME 3
 
 struct base{
 	float x,y,w,h,rot,count;
 };
 
+#define PLAYER_JUMP -0.3f
 #define PLAYER_MAX_SPEED 0.1f
-#define PLAYER_ACCELERATE 0.006f
+#define PLAYER_ACCELERATE 0.01f
 #define PLAYER_WIDTH 1.0125f
 #define PLAYER_HEIGHT 1.3875f
 struct player{
 	struct base base;
 	float xv,yv;
-	int lives;
+	int lives,canjump;
 };
 
 #define BLOCK_COUNT 40
@@ -62,7 +66,7 @@ struct state{
 	struct crosshair pointer[2];
 	struct device device;
 	struct vibrate vibrate;
-	struct base background,lava;
+	struct base background,lava,buttonframe;
 	struct block block[BLOCK_COUNT];
 	struct base lbutton,rbutton,jbutton,fbutton;
 	int lbuttonstate,rbuttonstate,jbuttonstate,fbuttonstate;

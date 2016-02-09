@@ -14,7 +14,7 @@ void init_display(struct state *state){
 	EGLConfig config;
 	int configcount;
 	eglChooseConfig(state->display,(int[]){EGL_RED_SIZE,8,EGL_GREEN_SIZE,8,EGL_BLUE_SIZE,8,EGL_NONE},&config,1,&configcount);
-	ANativeWindow_setBuffersGeometry(state->app->window,state->device.w,state->device.h,0);
+	ANativeWindow_setBuffersGeometry(state->app->window,/*state->device.w,state->device.h*/960,540,0);
 	state->surface=eglCreateWindowSurface(state->display,config,state->app->window,NULL);
 	state->context=eglCreateContext(state->display,config,NULL,(int[]){EGL_CONTEXT_CLIENT_VERSION,2,EGL_NONE});
 	eglMakeCurrent(state->display,state->surface,state->surface,state->context);
@@ -44,7 +44,7 @@ void init_display(struct state *state){
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glClearColor(1.0f,1.0f,1.0f,1.0f);
-	set_ftfont_params(state->device.w,state->device.h,state->rect.right*2.0f,state->rect.bottom*2.0f,state->uniform.vector,state->uniform.size,state->uniform.texcoords);
+	set_ftfont_params(/*state->device.w,state->device.h*/960,540,state->rect.right*2.0f,state->rect.bottom*2.0f,state->uniform.vector,state->uniform.size,state->uniform.texcoords);
 	state->font.main=create_ftfont(state->app->activity->assetManager,0.5f,"corbel.ttf");
 	state->font.header=create_ftfont(state->app->activity->assetManager,0.9f,"BAUHS93.TTF");
 }

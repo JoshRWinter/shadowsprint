@@ -24,6 +24,7 @@ int core(struct state *state){
 			if(side==COLLIDE_TOP){
 				state->player.yv=0.0f;
 				state->player.base.y=state->block[i].base.y-PLAYER_HEIGHT;
+				state->player.canjump=true;
 			}
 			else if(side==COLLIDE_LEFT){
 				state->player.xv=0.0f;
@@ -48,6 +49,10 @@ int core(struct state *state){
 	}
 	else zerof(&state->player.xv,PLAYER_ACCELERATE);
 	if(state->jbuttonstate=pointing(state->pointer,&state->jbutton)){
+		if(state->player.canjump){
+			state->player.canjump=false;
+			state->player.yv=PLAYER_JUMP;
+		}
 	}
 	if(state->fbuttonstate=pointing(state->pointer,&state->fbutton)){
 	}
@@ -115,6 +120,7 @@ void init(struct state *state){
 	state->rbutton=(struct base){-4.75f,2.0f,BUTTONSMALL_SIZE,BUTTONSMALL_SIZE,0.0f,2.0f};
 	state->jbutton=(struct base){5.75f,2.0f,BUTTONSMALL_SIZE,BUTTONSMALL_SIZE,0.0f,2.0f};
 	state->fbutton=(struct base){5.75f,-0.25f,BUTTONSMALL_SIZE,BUTTONSMALL_SIZE,0.0f,2.0f};
+	state->buttonframe=(struct base){state->rect.right-3.8125f,state->rect.top,3.8125f,state->rect.bottom*2.0f,0.0f,1.0f};
 	state->player.base.w=PLAYER_WIDTH;
 	state->player.base.h=PLAYER_HEIGHT;
 	state->player.base.rot=0.0f;
@@ -132,4 +138,6 @@ void reset(struct state *state){
 	state->player.base.y=state->block[1].base.y-PLAYER_HEIGHT;
 	state->player.xv=0.0f;
 	state->player.yv=0.0f;
+	state->player.lives=3;
+	state->player.canjump=true;
 }
