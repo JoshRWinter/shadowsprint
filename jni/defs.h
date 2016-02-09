@@ -2,7 +2,7 @@
 #define DATAPATH "/data/data/joshwinter.shadow/files/"
 #define PI 3.14159f
 #define PI2 (2.0f*PI)
-#define TEX_MODE "110"
+#define TEX_MODE "1101"
 #define COLLIDE_RIGHT 1
 #define COLLIDE_TOP 2
 #define COLLIDE_LEFT 3
@@ -12,6 +12,7 @@
 #define TID_PLAYER 0
 #define TID_ENEMY 1
 #define TID_BLOCK 2
+#define TID_BLAST 3
 
 //ui
 #define TID_BACKGROUND 0
@@ -23,6 +24,7 @@ struct base{
 	float x,y,w,h,rot,count;
 };
 
+#define PLAYER_RELOAD 15
 #define PLAYER_JUMP -0.3f
 #define PLAYER_FRAME_TIMER 4
 #define PLAYER_MAX_SPEED 0.1f
@@ -32,13 +34,22 @@ struct base{
 struct player{
 	struct base base;
 	float xv,yv;
-	int lives,canjump,frame,frametimer,xinvert;
+	int lives,canjump,frame,frametimer,xinvert,reload;
 };
 
 #define BLOCK_COUNT 40
 struct block{
 	struct base base;
 	int hidden;
+};
+
+#define BLAST_SIZE 0.5f
+#define BLAST_SPEED 0.2125f
+struct blast{
+	struct base base;
+	float xv;
+	int ttl;
+	struct blast *next;
 };
 
 #define BUTTON_WIDTH 3.3f
@@ -62,7 +73,7 @@ struct state{
 	EGLSurface surface;
 	EGLContext context;
 	struct{int vector,size,texcoords,rot,rgba,projection;}uniform;
-	struct{ftfont *main,*header;}font;
+	struct{ftfont *main,*header,*symbol;}font;
 	struct{float left,right,bottom,top;}rect;
 	struct crosshair pointer[2];
 	struct device device;
@@ -72,6 +83,7 @@ struct state{
 	struct base lbutton,rbutton,jbutton,fbutton;
 	int lbuttonstate,rbuttonstate,jbuttonstate,fbuttonstate;
 	struct player player;
+	struct blast *blastlist;
 };
 
 int process(struct android_app*);
@@ -86,9 +98,11 @@ int buttondraw(struct state*,struct button*);
 void buttondrawtext(ftfont*,struct button*);
 void uidraw(struct state*,struct base*,float);
 void draw(struct state*,struct base*,float,int);
+int collide(struct base*,struct base*);
+int correct(struct base*,struct base*);
 int menu_main(struct state*);
 int menu_message(struct state*,const char*,const char*,int*);
 
-int collide(struct base*,struct base*);
-int correct(struct base*,struct base*);
 void newblocks(struct state*);
+void newblast(struct state*);
+struct blast *deleteblast(struct state*,struct blast*,struct blast*);

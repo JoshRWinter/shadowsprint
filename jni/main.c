@@ -47,11 +47,13 @@ void init_display(struct state *state){
 	set_ftfont_params(/*state->device.w,state->device.h*/960,540,state->rect.right*2.0f,state->rect.bottom*2.0f,state->uniform.vector,state->uniform.size,state->uniform.texcoords);
 	state->font.main=create_ftfont(state->app->activity->assetManager,0.5f,"corbel.ttf");
 	state->font.header=create_ftfont(state->app->activity->assetManager,0.9f,"BAUHS93.TTF");
+	state->font.symbol=create_ftfont(state->app->activity->assetManager,0.6f,"WINGDNG3.TTF");
 }
 void term_display(struct state *state){
 	state->running=false;
 	destroy_ftfont(state->font.main);
 	destroy_ftfont(state->font.header);
+	destroy_ftfont(state->font.symbol);
 	destroypack(&state->assets);
 	destroypack(&state->uiassets);
 	glDeleteProgram(state->program);

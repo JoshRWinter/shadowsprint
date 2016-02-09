@@ -1,1 +1,1 @@
-player.tga enemy.tga block.tga -o ..\assets\assets
+player.tga enemy.tga block.tga blast.tga -o ..\assets\assets
