@@ -6,21 +6,22 @@
 #include "defs.h"
 
 void newblocks(struct state *state){
-	float offset=-1.0f,lasth,lasthidden;
+	float offset=-1.5f,lasth,lasthidden;
 	const float BLOCK_CEILING=6.2f;
-	const float BLOCK_FLOOR= 2.0f;
+	const float BLOCK_FLOOR=2.0f;
+	const float BLOCK_SPACING=0.45f;
 	for(int i=0;i<BLOCK_COUNT;++i){
 		state->block[i].hidden=(lasthidden?false:onein(3))||i==0||i==BLOCK_COUNT-1;
 		if(state->block[i].hidden){
 			state->block[i].base.h=state->rect.bottom*2.0f;
-			state->block[i].base.w=1.25f;
+			state->block[i].base.w=1.45f;
 		}
 		else{
 			if(i==1)state->block[i].base.h=randomint(BLOCK_FLOOR*10.0f,BLOCK_CEILING*10.0f)/10.0f;
 			else{
 				do{
 					state->block[i].base.h=lasth+(randomint(-100,100)/100.0f);
-				}while(state->block[i].base.h>BLOCK_CEILING||state->block[i].base.h<BLOCK_FLOOR);
+				}while((state->block[i].base.h>BLOCK_CEILING||state->block[i].base.h<BLOCK_FLOOR)||fabs(state->block[i].base.h-lasth)<BLOCK_SPACING);
 			}
 			state->block[i].base.w=randomint(275,450)/100.0f;
 		}
