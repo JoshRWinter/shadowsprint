@@ -60,6 +60,7 @@ struct blast *deleteblast(struct state *state,struct blast *blast,struct blast *
 
 void newparticle(struct state *state,float x,float y,int count){
 	const float PARTICLE_SPEED=3.8f;
+	newshockwave(state,x,y);
 	for(int i=0;i<count;++i){
 		float angle=torad(randomint(1,360));
 		struct particle *particle=malloc(sizeof(struct particle));
@@ -84,6 +85,26 @@ struct particle *deleteparticle(struct state *state,struct particle *particle,st
 	return temp;
 }
 
+void newshockwave(struct state *state,float x,float y){
+	struct shockwave *shockwave=malloc(sizeof(struct shockwave));
+	shockwave->base.w=0.0f;
+	shockwave->base.h=0.0f;
+	shockwave->base.x=x;
+	shockwave->base.y=y;
+	shockwave->base.rot=0.0f;
+	shockwave->base.count=1.0f;
+	shockwave->alpha=1.0f;
+	shockwave->next=state->shockwavelist;
+	state->shockwavelist=shockwave;
+}
+struct shockwave *deleteshockwave(struct state *state,struct shockwave *shockwave,struct shockwave *prev){
+	if(prev!=NULL)prev->next=shockwave->next;
+	else state->shockwavelist=shockwave->next;
+	void *temp=shockwave->next;
+	free(shockwave);
+	return temp;
+}
+
 void newsmoke(struct state *state,struct base *base){
 	if(!onein(5))return;
 	struct smoke *smoke=malloc(sizeof(struct smoke));
@@ -102,5 +123,26 @@ struct smoke *deletesmoke(struct state *state,struct smoke *smoke,struct smoke *
 	else state->smokelist=smoke->next;
 	void *temp=smoke->next;
 	free(smoke);
+	return temp;
+}
+
+void newcloud(struct state *state){
+	struct cloud *cloud=malloc(sizeof(struct cloud));
+	cloud->base.w=CLOUD_WIDTH;
+	cloud->base.h=CLOUD_HEIGHT;
+	cloud->base.y=randomint(state->rect.top*10.0f,0.0f)/10.0f;
+	cloud->base.x=randomint((state->player.base.x+state->rect.right+2.0f)*10.0f,(state->player.base.x+state->rect.right+7.0f)*10.0f)/10.0f;
+	cloud->base.rot=0.0f;
+	cloud->base.count=1.0f;
+	cloud->xinvert=onein(2);
+	cloud->xv=-randomint(20,40)/1000.0f;
+	cloud->next=state->cloudlist;
+	state->cloudlist=cloud;
+}
+struct cloud *deletecloud(struct state *state,struct cloud *cloud,struct cloud *prev){
+	if(prev!=NULL)prev->next=cloud->next;
+	else state->cloudlist=cloud->next;
+	void *temp=cloud->next;
+	free(cloud);
 	return temp;
 }

@@ -70,7 +70,7 @@ int correct(struct base *a,struct base *b){
 	float ldiff,rdiff,tdiff;
 	ldiff=fabs((a->x+a->w)-b->x);
 	rdiff=fabs(a->x-(b->x+b->w));
-	tdiff=fabs((a->y+a->h)-b->y);
+	tdiff=fabs((a->y+a->h)-b->y)/2.0f;
 	float smallest=ldiff;
 	if(rdiff<smallest)smallest=rdiff;
 	if(tdiff<smallest)smallest=tdiff;

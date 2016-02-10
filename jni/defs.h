@@ -2,7 +2,7 @@
 #define DATAPATH "/data/data/joshwinter.shadow/files/"
 #define PI 3.14159f
 #define PI2 (2.0f*PI)
-#define TEX_MODE "1101"
+#define TEX_MODE "110110"
 #define COLLIDE_RIGHT 1
 #define COLLIDE_TOP 2
 #define COLLIDE_LEFT 3
@@ -14,6 +14,8 @@
 #define TID_ENEMY 1
 #define TID_BLOCK 2
 #define TID_BLAST 3
+#define TID_SHOCKWAVE 4
+#define TID_CLOUD 5
 
 //ui
 #define TID_BACKGROUND 0
@@ -62,11 +64,29 @@ struct particle{
 	struct particle *next;
 };
 
+#define SHOCKWAVE_INFLATE 0.2f
+#define SHOCKWAVE_FADE 0.05f
+struct shockwave{
+	struct base base;
+	float alpha;
+	struct shockwave *next;
+};
+
 #define SMOKE_SIZE 0.1f
 struct smoke{
 	struct base base;
 	float alpha;
 	struct smoke *next;
+};
+
+#define CLOUD_WIDTH 4.5f
+#define CLOUD_HEIGHT 3.0f
+#define CLOUD_BOUND -12.0f
+struct cloud{
+	struct base base;
+	int xinvert;
+	float xv;
+	struct cloud *next;
 };
 
 #define BUTTON_WIDTH 3.3f
@@ -102,7 +122,9 @@ struct state{
 	struct player player;
 	struct blast *blastlist;
 	struct particle *particlelist;
+	struct shockwave *shockwavelist;
 	struct smoke *smokelist;
+	struct cloud *cloudlist;
 };
 
 int process(struct android_app*);
@@ -125,7 +147,11 @@ int menu_message(struct state*,const char*,const char*,int*);
 void newblocks(struct state*);
 void newblast(struct state*);
 struct blast *deleteblast(struct state*,struct blast*,struct blast*);
-void newsmoke(struct state*,struct base*);
-struct smoke *deletesmoke(struct state*,struct smoke*,struct smoke*);
 void newparticle(struct state *state,float,float,int);
 struct particle *deleteparticle(struct state*,struct particle*,struct particle*);
+void newshockwave(struct state*,float,float);
+struct shockwave *deleteshockwave(struct state*,struct shockwave*,struct shockwave*);
+void newsmoke(struct state*,struct base*);
+struct smoke *deletesmoke(struct state*,struct smoke*,struct smoke*);
+void newcloud(struct state*);
+struct cloud *deletecloud(struct state*,struct cloud*,struct cloud*);
