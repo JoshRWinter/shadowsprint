@@ -43,13 +43,21 @@ struct block{
 	int hidden;
 };
 
-#define BLAST_SIZE 0.5f
+#define BLAST_WIDTH 1.1f
+#define BLAST_HEIGHT 0.4f
 #define BLAST_SPEED 0.2125f
 struct blast{
 	struct base base;
 	float xv;
-	int ttl;
+	int ttl,frame,frametimer;
 	struct blast *next;
+};
+
+#define SMOKE_SIZE 0.1f
+struct smoke{
+	struct base base;
+	float alpha;
+	struct smoke *next;
 };
 
 #define BUTTON_WIDTH 3.3f
@@ -84,6 +92,7 @@ struct state{
 	int lbuttonstate,rbuttonstate,jbuttonstate,fbuttonstate;
 	struct player player;
 	struct blast *blastlist;
+	struct smoke *smokelist;
 };
 
 int process(struct android_app*);
@@ -106,3 +115,5 @@ int menu_message(struct state*,const char*,const char*,int*);
 void newblocks(struct state*);
 void newblast(struct state*);
 struct blast *deleteblast(struct state*,struct blast*,struct blast*);
+void newsmoke(struct state*,struct base*);
+struct smoke *deletesmoke(struct state*,struct smoke*,struct smoke*);

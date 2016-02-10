@@ -37,13 +37,15 @@ void newblocks(struct state *state){
 void newblast(struct state *state){
 	state->player.reload=PLAYER_RELOAD;
 	struct blast *blast=malloc(sizeof(struct blast));
-	blast->base.w=BLAST_SIZE;
-	blast->base.h=BLAST_SIZE;
-	blast->base.x=state->player.xinvert?state->player.base.x-BLAST_SIZE:state->player.base.x+PLAYER_WIDTH;
-	blast->base.y=state->player.base.y+(PLAYER_HEIGHT/2.0f)-(BLAST_SIZE/2.0f);
+	blast->base.w=BLAST_WIDTH;
+	blast->base.h=BLAST_HEIGHT;
+	blast->base.x=state->player.xinvert?state->player.base.x-BLAST_WIDTH:state->player.base.x+PLAYER_WIDTH;
+	blast->base.y=state->player.base.y+(PLAYER_HEIGHT/2.0f)-(BLAST_HEIGHT/2.0f);
 	blast->base.rot=0.0f;
 	blast->base.count=4.0f;
 	blast->ttl=70;
+	blast->frame=0;
+	blast->frametimer=0;
 	blast->xv=state->player.xinvert?-BLAST_SPEED:BLAST_SPEED;
 	blast->next=state->blastlist;
 	state->blastlist=blast;
@@ -53,5 +55,26 @@ struct blast *deleteblast(struct state *state,struct blast *blast,struct blast *
 	else state->blastlist=blast->next;
 	void *temp=blast->next;
 	free(blast);
+	return temp;
+}
+
+void newsmoke(struct state *state,struct base *base){
+	if(!onein(5))return;
+	struct smoke *smoke=malloc(sizeof(struct smoke));
+	smoke->base.w=SMOKE_SIZE;
+	smoke->base.h=SMOKE_SIZE;
+	smoke->base.x=base->x;
+	smoke->base.y=base->y+(randomint(0.0f,base->h*10.0f)/10.0f);
+	smoke->base.rot=0.0f;
+	smoke->base.count=1.0f;
+	smoke->alpha=randomint(60,80)/100.0f;
+	smoke->next=state->smokelist;
+	state->smokelist=smoke;
+}
+struct smoke *deletesmoke(struct state *state,struct smoke *smoke,struct smoke *prev){
+	if(prev!=NULL)prev->next=smoke->next;
+	else state->smokelist=smoke->next;
+	void *temp=smoke->next;
+	free(smoke);
 	return temp;
 }

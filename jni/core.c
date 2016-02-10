@@ -56,6 +56,11 @@ int core(struct state *state){
 	
 	for(struct blast *blast=state->blastlist,*prevblast=NULL;blast!=NULL;){
 		blast->base.x+=blast->xv;
+		newsmoke(state,&blast->base);
+		if(blast->frametimer++>4){
+			blast->frametimer=0;
+			if(++blast->frame>3)blast->frame=0;
+		}
 		if(!blast->ttl--){
 			blast=deleteblast(state,blast,prevblast);
 			continue;
@@ -74,6 +79,16 @@ int core(struct state *state){
 		blast=blast->next;
 	}
 	
+	for(struct smoke *smoke=state->smokelist,*prevsmoke=NULL;smoke!=NULL;){
+		if((smoke->alpha-=randomint(0,1)/100.0f)<0.0f){
+			smoke=deletesmoke(state,smoke,prevsmoke);
+			continue;
+		}
+		prevsmoke=smoke;
+		smoke=smoke->next;
+	}
+	
+	// buttons
 	state->lbuttonstate=pointing(state->pointer,&state->lbutton);
 	state->rbuttonstate=pointing(state->pointer,&state->rbutton);
 	if(state->lbuttonstate){
@@ -121,10 +136,19 @@ void render(struct state *state){
 	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_PLAYER].object);
 	draw(state,&state->player.base,state->player.frame,state->player.xinvert);
 	
+	if(state->smokelist){
+		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
+		for(struct smoke *smoke=state->smokelist;smoke!=NULL;smoke=smoke->next){
+			glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,smoke->alpha);
+			draw(state,&smoke->base,0,false);
+		}
+	}
+	
+	glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 	if(state->blastlist){
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLAST].object);
 		for(struct blast *blast=state->blastlist;blast!=NULL;blast=blast->next)
-			draw(state,&blast->base,0,state->player.xinvert);
+			draw(state,&blast->base,blast->frame,blast->xv>0.0f?false:true);
 	}
 	
 	glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON2].object);
@@ -176,9 +200,11 @@ void init(struct state *state){
 	state->player.base.h=PLAYER_HEIGHT;
 	state->player.base.count=8.0f;
 	state->blastlist=NULL;
+	state->smokelist=NULL;
 }
 void reset(struct state *state){
 	for(struct blast *blast=state->blastlist;blast!=NULL;blast=deleteblast(state,blast,NULL));
+	for(struct smoke *smoke=state->smokelist;smoke!=NULL;smoke=deletesmoke(state,smoke,NULL));
 	newblocks(state);
 	state->player.base.x=0.0f;
 	state->player.base.y=state->block[1].base.y-PLAYER_HEIGHT;
