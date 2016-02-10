@@ -7,6 +7,7 @@
 #define COLLIDE_TOP 2
 #define COLLIDE_LEFT 3
 #define GRAVITY 0.02f
+#define torad(x) (x*(PI/180.0f))
 
 // gameplay
 #define TID_PLAYER 0
@@ -53,6 +54,14 @@ struct blast{
 	struct blast *next;
 };
 
+#define PARTICLE_SIZE 0.1f
+struct particle{
+	struct base base;
+	float xv,yv;
+	int ttl;
+	struct particle *next;
+};
+
 #define SMOKE_SIZE 0.1f
 struct smoke{
 	struct base base;
@@ -92,6 +101,7 @@ struct state{
 	int lbuttonstate,rbuttonstate,jbuttonstate,fbuttonstate;
 	struct player player;
 	struct blast *blastlist;
+	struct particle *particlelist;
 	struct smoke *smokelist;
 };
 
@@ -117,3 +127,5 @@ void newblast(struct state*);
 struct blast *deleteblast(struct state*,struct blast*,struct blast*);
 void newsmoke(struct state*,struct base*);
 struct smoke *deletesmoke(struct state*,struct smoke*,struct smoke*);
+void newparticle(struct state *state,float,float,int);
+struct particle *deleteparticle(struct state*,struct particle*,struct particle*);

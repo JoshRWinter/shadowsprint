@@ -58,6 +58,32 @@ struct blast *deleteblast(struct state *state,struct blast *blast,struct blast *
 	return temp;
 }
 
+void newparticle(struct state *state,float x,float y,int count){
+	const float PARTICLE_SPEED=3.8f;
+	for(int i=0;i<count;++i){
+		float angle=torad(randomint(1,360));
+		struct particle *particle=malloc(sizeof(struct particle));
+		particle->base.w=PARTICLE_SIZE;
+		particle->base.h=PARTICLE_SIZE;
+		particle->base.x=x-(PARTICLE_SIZE/2.0f);
+		particle->base.y=y-(PARTICLE_SIZE/2.0f);
+		particle->base.rot=torad(randomint(1,360));
+		particle->base.count=1.0f;
+		particle->xv=cosf(angle)/PARTICLE_SPEED;
+		particle->yv=sinf(angle)/PARTICLE_SPEED;
+		particle->ttl=randomint(120,145);
+		particle->next=state->particlelist;
+		state->particlelist=particle;
+	}
+}
+struct particle *deleteparticle(struct state *state,struct particle *particle,struct particle *prev){
+	if(prev!=NULL)prev->next=particle->next;
+	else state->particlelist=particle->next;
+	void *temp=particle->next;
+	free(particle);
+	return temp;
+}
+
 void newsmoke(struct state *state,struct base *base){
 	if(!onein(5))return;
 	struct smoke *smoke=malloc(sizeof(struct smoke));

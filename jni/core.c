@@ -1,6 +1,7 @@
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <android_native_app_glue.h>
+#include <math.h>
 #include "defs.h"
 
 int core(struct state *state){
@@ -62,6 +63,7 @@ int core(struct state *state){
 			if(++blast->frame>3)blast->frame=0;
 		}
 		if(!blast->ttl--){
+			newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),20);
 			blast=deleteblast(state,blast,prevblast);
 			continue;
 		}
@@ -69,6 +71,7 @@ int core(struct state *state){
 		for(int i=0;i<BLOCK_COUNT;++i){
 			if(state->block[i].hidden)continue;
 			if(collide(&state->block[i].base,&blast->base)){
+				newparticle(state,blast->xv>0.0f?blast->base.x+BLAST_WIDTH:blast->base.x,blast->base.y+(BLAST_HEIGHT/2.0f),20);
 				blast=deleteblast(state,blast,prevblast);
 				stop=true;
 				break;
@@ -77,6 +80,46 @@ int core(struct state *state){
 		if(stop)continue;
 		prevblast=blast;
 		blast=blast->next;
+	}
+	
+	for(struct particle *particle=state->particlelist,*prevparticle=NULL;particle!=NULL;){
+		for(int i=1;i<BLOCK_COUNT;++i){
+			if(state->block[i].hidden)continue;
+			int side=correct(&particle->base,&state->block[i].base);
+			if(side&&particle->ttl>0){
+				if(side==COLLIDE_TOP){
+					particle->yv/=-1.4f;
+					particle->base.y=state->block[i].base.y-PARTICLE_SIZE;
+				}
+				else if(side==COLLIDE_LEFT){
+					particle->xv/=-1.2f;
+					particle->base.x=state->block[i].base.x-PARTICLE_SIZE;
+				}
+				else{
+					particle->xv/=-1.2f;
+					particle->base.x=state->block[i].base.x+state->block[i].base.w;
+				}
+			}
+		}
+		if(particle->ttl--<1){
+			particle->base.y+=0.002f;
+			if(particle->ttl<-80){
+				particle=deleteparticle(state,particle,prevparticle);
+				continue;
+			}
+		}
+		else if(particle->base.y>state->rect.bottom){
+			particle=deleteparticle(state,particle,prevparticle);
+			continue;
+		}
+		particle->xv/=1.08f;
+		particle->yv+=GRAVITY;
+		particle->base.rot+=particle->xv*3.0f;
+		particle->base.x+=particle->xv;
+		if(particle->ttl>0)particle->base.y+=particle->yv;
+		
+		prevparticle=particle;
+		particle=particle->next;
 	}
 	
 	for(struct smoke *smoke=state->smokelist,*prevsmoke=NULL;smoke!=NULL;){
@@ -136,12 +179,16 @@ void render(struct state *state){
 	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_PLAYER].object);
 	draw(state,&state->player.base,state->player.frame,state->player.xinvert);
 	
-	if(state->smokelist){
+	if(state->particlelist){
+		glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
-		for(struct smoke *smoke=state->smokelist;smoke!=NULL;smoke=smoke->next){
-			glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,smoke->alpha);
-			draw(state,&smoke->base,0,false);
-		}
+		for(struct particle *particle=state->particlelist;particle!=NULL;particle=particle->next)
+			draw(state,&particle->base,0,false);
+	}
+	
+	for(struct smoke *smoke=state->smokelist;smoke!=NULL;smoke=smoke->next){
+		glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,smoke->alpha);
+		draw(state,&smoke->base,0,false);
 	}
 	
 	glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
@@ -200,10 +247,12 @@ void init(struct state *state){
 	state->player.base.h=PLAYER_HEIGHT;
 	state->player.base.count=8.0f;
 	state->blastlist=NULL;
+	state->particlelist=NULL;
 	state->smokelist=NULL;
 }
 void reset(struct state *state){
 	for(struct blast *blast=state->blastlist;blast!=NULL;blast=deleteblast(state,blast,NULL));
+	for(struct particle *particle=state->particlelist;particle!=NULL;particle=deleteparticle(state,particle,NULL));
 	for(struct smoke *smoke=state->smokelist;smoke!=NULL;smoke=deletesmoke(state,smoke,NULL));
 	newblocks(state);
 	state->player.base.x=0.0f;
