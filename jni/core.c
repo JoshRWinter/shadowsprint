@@ -187,6 +187,7 @@ void render(struct state *state){
 	}
 	
 	for(struct smoke *smoke=state->smokelist;smoke!=NULL;smoke=smoke->next){
+		if(!state->particlelist)glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
 		glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,smoke->alpha);
 		draw(state,&smoke->base,0,false);
 	}
