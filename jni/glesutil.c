@@ -937,76 +937,48 @@ void termOpenSL(slesenv *soundengine){
 
 void init_jni(struct android_app *app,struct jni_info *jni_info){
 	jni_info->vm=app->activity->vm;
-	logcat("DEBUG TAG: %d",__LINE__);
 	jni_info->clazz=app->activity->clazz;
-	logcat("DEBUG TAG: %d",__LINE__);
 	(*jni_info->vm)->AttachCurrentThread(jni_info->vm,&jni_info->env,NULL);
-	//jni_info->env = app->activity->env;
-	jclass sys_svc=(*jni_info->env)->GetObjectClass(jni_info->env,jni_info->clazz);
-	logcat("DEBUG TAG: %d",__LINE__);
-	jmethodID mid=(*jni_info->env)->GetMethodID(jni_info->env,sys_svc,"getSystemService","(Ljava/lang/String;)Ljava/lang/Object;");
-	logcat("DEBUG TAG: %d",__LINE__);
+	jni_info->sys_svc=(*jni_info->env)->GetObjectClass(jni_info->env,jni_info->clazz);
+	jmethodID mid=(*jni_info->env)->GetMethodID(jni_info->env,jni_info->sys_svc,"getSystemService","(Ljava/lang/String;)Ljava/lang/Object;");
 	jstring mstr=(*jni_info->env)->NewStringUTF(jni_info->env,"vibrator");
-	logcat("DEBUG TAG: %d",__LINE__);
 	jni_info->vb_svc=(*jni_info->env)->CallObjectMethod(jni_info->env,jni_info->clazz,mid,mstr);
-	logcat("DEBUG TAG: %d",__LINE__);
 	jobject vb=(*jni_info->env)->GetObjectClass(jni_info->env,jni_info->vb_svc);
-	logcat("DEBUG TAG: %d",__LINE__);
 	jmethodID hasvbmethod=(*jni_info->env)->GetMethodID(jni_info->env,vb,"hasVibrator","()Z");
-	logcat("DEBUG TAG: %d",__LINE__);
 	jni_info->hasvb=(*jni_info->env)->CallBooleanMethod(jni_info->env,jni_info->vb_svc,hasvbmethod);
-	logcat("DEBUG TAG: %d",__LINE__);
 	if(!jni_info->hasvb)logcat("This device cannot vibrate");
 	else jni_info->vbmethod=(*jni_info->env)->GetMethodID(jni_info->env,vb,"vibrate","(J)V");
-	logcat("DEBUG TAG: %d",__LINE__);
 	
-	(*jni_info->env)->DeleteLocalRef(jni_info->env,sys_svc);
-	logcat("DEBUG TAG: %d",__LINE__);
+	jni_info-> MethodGetWindow = (*jni_info->env)->GetMethodID(jni_info->env,jni_info->sys_svc, "getWindow", "()Landroid/view/Window;");
+	jni_info-> lWindow = (*jni_info->env)->CallObjectMethod(jni_info->env,jni_info-> clazz, jni_info->MethodGetWindow);
+	jni_info-> cWindow = (*jni_info->env)->FindClass(jni_info->env,"android/view/Window");
+	jni_info-> cView = (*jni_info->env)->FindClass(jni_info->env,"android/view/View");
+	jni_info-> MethodGetDecorView = (*jni_info->env)->GetMethodID(jni_info->env, jni_info->cWindow, "getDecorView", "()Landroid/view/View;");
+	jni_info-> lDecorView = (*jni_info->env)->CallObjectMethod(jni_info->env, jni_info->lWindow, jni_info->MethodGetDecorView);
+	jni_info-> MethodSetSystemUiVisibility = (*jni_info->env)->GetMethodID(jni_info->env,jni_info->cView, "setSystemUiVisibility", "(I)V");
+	
 	(*jni_info->env)->DeleteLocalRef(jni_info->env,mstr);
-	logcat("DEBUG TAG: %d",__LINE__);
 	(*jni_info->env)->DeleteLocalRef(jni_info->env,vb);
-	logcat("DEBUG TAG: %d",__LINE__);
 }
 void vibratedevice(struct jni_info *jni_info,int mills){
-	logcat("enter vibratedevice");
 	if(jni_info->hasvb){
 		jlong v1=mills;
 		(*jni_info->env)->CallVoidMethod(jni_info->env,jni_info->vb_svc,jni_info->vbmethod,v1);
 	}
-	logcat("exit vibratedevice");
 }
 void term_jni(struct jni_info *jni_info){
+	(*jni_info->env)->DeleteLocalRef(jni_info->env,jni_info->sys_svc);
+	(*jni_info->env)->DeleteLocalRef(jni_info->env,jni_info->lWindow);
+	(*jni_info->env)->DeleteLocalRef(jni_info->env,jni_info->cWindow);
+	(*jni_info->env)->DeleteLocalRef(jni_info->env,jni_info->cView);
+	(*jni_info->env)->DeleteLocalRef(jni_info->env,jni_info->lDecorView);
 	(*jni_info->env)->DeleteLocalRef(jni_info->env,jni_info->vb_svc);
 	(*jni_info->vm)->DetachCurrentThread(jni_info->vm);
 }
 void hidenavbars(struct jni_info *jni_info){
-	logcat("DEBUG TAG: %d",__LINE__);
-	(*jni_info->vm)->AttachCurrentThread(jni_info->vm,&jni_info->env,NULL);
-	jclass sys_svc=(*jni_info->env)->GetObjectClass(jni_info->env,jni_info->clazz);
-	logcat("DEBUG TAG: %d",__LINE__);
-	jmethodID MethodGetWindow = (*jni_info->env)->GetMethodID(jni_info->env,sys_svc, "getWindow", "()Landroid/view/Window;");
-	logcat("DEBUG TAG: %d",__LINE__);
-	jobject lWindow = (*jni_info->env)->CallObjectMethod(jni_info->env,jni_info-> clazz, MethodGetWindow);
-	logcat("DEBUG TAG: %d",__LINE__);
-	jclass cWindow = (*jni_info->env)->FindClass(jni_info->env,"android/view/Window");
-	logcat("DEBUG TAG: %d",__LINE__);
-	jclass cView = (*jni_info->env)->FindClass(jni_info->env,"android/view/View");
-	logcat("DEBUG TAG: %d",__LINE__);
-	jmethodID MethodGetDecorView = (*jni_info->env)->GetMethodID(jni_info->env, cWindow, "getDecorView", "()Landroid/view/View;");
-	logcat("DEBUG TAG: %d",__LINE__);
-	jobject lDecorView = (*jni_info->env)->CallObjectMethod(jni_info->env, lWindow, MethodGetDecorView);
-	logcat("DEBUG TAG: %d",__LINE__);
-	jmethodID MethodSetSystemUiVisibility = (*jni_info->env)->GetMethodID(jni_info->env,cView, "setSystemUiVisibility", "(I)V");
-	logcat("DEBUG TAG: %d",__LINE__);
 	jint jVisibility = 256 | 512 | 1024 | 2 | 4 | 4096;
-	logcat("DEBUG TAG: %d",__LINE__);
-	(*jni_info->env)->CallVoidMethod(jni_info->env, lDecorView, MethodSetSystemUiVisibility, jVisibility);
-	logcat("DEBUG TAG: %d",__LINE__);
-	
-	(*jni_info->env)->DeleteLocalRef(jni_info->env,sys_svc);
-	(*jni_info->env)->DeleteLocalRef(jni_info->env,lWindow);
-	(*jni_info->env)->DeleteLocalRef(jni_info->env,cWindow);
-	(*jni_info->env)->DeleteLocalRef(jni_info->env,cView);
-	(*jni_info->env)->DeleteLocalRef(jni_info->env,lDecorView);
-	(*jni_info->vm)->DetachCurrentThread(jni_info->vm);
+	(*jni_info->env)->CallVoidMethod(jni_info->env, jni_info->lDecorView, jni_info->MethodSetSystemUiVisibility, jVisibility);
+	if((*jni_info->env)->ExceptionCheck){
+		(*jni_info->env)->ExceptionClear(jni_info->env);
+	}
 }

@@ -86,6 +86,9 @@ int32_t inputproc(struct android_app *app,AInputEvent *event){
 void cmdproc(struct android_app *app,int32_t cmd){
 	struct state *state=app->userData;
 	switch(cmd){
+		case APP_CMD_RESUME:
+			hidenavbars(&state->jni_info);
+			break;
 		case APP_CMD_INIT_WINDOW:
 			init_display(app->userData);
 			break;
@@ -125,6 +128,8 @@ void android_main(struct android_app *app){
 		render(&state);
 		eglSwapBuffers(state.display,state.surface);
 	}
+	logcat("before term");
 	term_jni(&state.jni_info);
+	logcat("after_term");
 	logcat("--- END LOG ---");
 }

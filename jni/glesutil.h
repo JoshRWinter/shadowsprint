@@ -76,9 +76,19 @@ struct jni_info{
 	JNIEnv *env;
 	JavaVM *vm;
 	jobject clazz;
+	jobject sys_svc;
+	
 	int hasvb;
 	jclass vb_svc;
 	jmethodID vbmethod;
+	
+	jmethodID MethodGetWindow;
+	jobject lWindow;
+	jclass cWindow;
+	jclass cView;
+	jmethodID MethodGetDecorView;
+	jobject lDecorView;
+	jmethodID MethodSetSystemUiVisibility;
 };
 int loadpack(struct pack *asset,AAssetManager *mgr,const char *filename,const char *mode);
 unsigned char *convert_power_of_two(unsigned char *bytedata,int *size,int width,int height);
