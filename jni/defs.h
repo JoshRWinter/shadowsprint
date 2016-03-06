@@ -114,7 +114,7 @@ struct state{
 	struct{float left,right,bottom,top;}rect;
 	struct crosshair pointer[2];
 	struct device device;
-	struct vibrate vibrate;
+	struct jni_info jni_info;
 	struct base background,lava,buttonframe;
 	struct block block[BLOCK_COUNT];
 	struct base lbutton,rbutton,jbutton,fbutton;

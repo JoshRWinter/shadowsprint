@@ -72,7 +72,7 @@ struct crosshair{
 struct device{
 	int w,h;
 };
-struct vibrate{
+struct jni_info{
 	JNIEnv *env;
 	JavaVM *vm;
 	jobject clazz;
@@ -110,7 +110,7 @@ float targetf(float *val,float step,float target);
 float align(float *rot,float step,float target);
 unsigned screenshot(int w,int h,int darken);
 unsigned screenshotblur(int w,int h,int resize,int intensity);
-void init_vibrate(struct android_app *app,struct vibrate *vibrate);
-void vibratedevice(struct vibrate* vibrate,int mills);
-void hidenavbars(struct vibrate *vibrate);
-void term_vibrate(struct vibrate *vibrate);
+void init_jni(struct android_app *app,struct jni_info *jni_info);
+void vibratedevice(struct jni_info* jni_info,int mills);
+void hidenavbars(struct jni_info *jni_info);
+void term_jni(struct jni_info *jni_info);

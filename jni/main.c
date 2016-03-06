@@ -86,13 +86,6 @@ int32_t inputproc(struct android_app *app,AInputEvent *event){
 void cmdproc(struct android_app *app,int32_t cmd){
 	struct state *state=app->userData;
 	switch(cmd){
-		case APP_CMD_RESUME:
-			init_vibrate(app,&state->vibrate);
-			hidenavbars(&((struct state*)app->userData)->vibrate);
-			break;
-		case APP_CMD_PAUSE:
-			term_vibrate(&state->vibrate);
-			break;
 		case APP_CMD_INIT_WINDOW:
 			init_display(app->userData);
 			break;
@@ -127,13 +120,11 @@ void android_main(struct android_app *app){
 	app->onInputEvent=inputproc;
 	init(&state);
 	reset(&state);
-	//init_vibrate(app,&state.vibrate);
+	init_jni(app,&state.jni_info);
 	while(process(app)&&core(&state)){
 		render(&state);
 		eglSwapBuffers(state.display,state.surface);
 	}
-	logcat("before detach");
-	term_vibrate(&state.vibrate);
-	logcat("after detach");
+	term_jni(&state.jni_info);
 	logcat("--- END LOG ---");
 }

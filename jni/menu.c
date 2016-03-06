@@ -4,7 +4,7 @@
 #include "defs.h"
 
 int menu_main(struct state *state){
-	vibratedevice(&state->vibrate,30);
+	vibratedevice(&state->jni_info,30);
 	const char *aboottext=
 	"Shadow Sprint\nProgrammed by Josh Winter\n\nFonts:\nCorbel\nBAUHAUS93";
 	const float bleftoffset=4.5f;
@@ -39,7 +39,7 @@ int menu_main(struct state *state){
 		buttondrawtext(state->font.main,&abootbutton);
 		buttondrawtext(state->font.main,&configbutton);
 		buttondrawtext(state->font.main,&quitbutton);
-		drawtextcentered(state->font.main,-2.0f,-2.0f,"lololololol\nHigh score: shitty");
+		drawtextcentered(state->font.main,-2.0f,-2.0f,"");
 		glBindTexture(GL_TEXTURE_2D,state->font.header->atlas);
 		drawtextcentered(state->font.header,-2.0f,-3.0f,"SHADOW SPRINT");
 		eglSwapBuffers(state->display,state->surface);
