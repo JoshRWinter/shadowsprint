@@ -4,6 +4,7 @@
 #include "defs.h"
 
 int menu_main(struct state *state){
+	vibratedevice(&state->vibrate,30);
 	const char *aboottext=
 	"Shadow Sprint\nProgrammed by Josh Winter\n\nFonts:\nCorbel\nBAUHAUS93";
 	const float bleftoffset=4.5f;

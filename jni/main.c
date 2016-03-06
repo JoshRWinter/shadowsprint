@@ -9,12 +9,13 @@ void init_display(struct state *state){
 	state->running=true;
 	initextensions();
 	getdims(&state->device,state->app->window,DIMS_LAND);
+	logcat("width: %d\nheight: %d",state->device.w,state->device.h);
 	state->display=eglGetDisplay(EGL_DEFAULT_DISPLAY);
 	eglInitialize(state->display,NULL,NULL);
 	EGLConfig config;
 	int configcount;
 	eglChooseConfig(state->display,(int[]){EGL_RED_SIZE,8,EGL_GREEN_SIZE,8,EGL_BLUE_SIZE,8,EGL_NONE},&config,1,&configcount);
-	ANativeWindow_setBuffersGeometry(state->app->window,/*state->device.w,state->device.h*/960,540,0);
+	ANativeWindow_setBuffersGeometry(state->app->window,state->device.w,state->device.h,0);
 	state->surface=eglCreateWindowSurface(state->display,config,state->app->window,NULL);
 	state->context=eglCreateContext(state->display,config,NULL,(int[]){EGL_CONTEXT_CLIENT_VERSION,2,EGL_NONE});
 	eglMakeCurrent(state->display,state->surface,state->surface,state->context);
@@ -44,7 +45,7 @@ void init_display(struct state *state){
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glClearColor(1.0f,1.0f,1.0f,1.0f);
-	set_ftfont_params(/*state->device.w,state->device.h*/960,540,state->rect.right*2.0f,state->rect.bottom*2.0f,state->uniform.vector,state->uniform.size,state->uniform.texcoords);
+	set_ftfont_params(2560,1440,state->rect.right*2.0f,state->rect.bottom*2.0f,state->uniform.vector,state->uniform.size,state->uniform.texcoords);
 	state->font.main=create_ftfont(state->app->activity->assetManager,0.5f,"corbel.ttf");
 	state->font.header=create_ftfont(state->app->activity->assetManager,0.9f,"BAUHS93.TTF");
 	state->font.symbol=create_ftfont(state->app->activity->assetManager,0.6f,"WINGDNG3.TTF");
@@ -83,7 +84,15 @@ int32_t inputproc(struct android_app *app,AInputEvent *event){
 	return false;
 }
 void cmdproc(struct android_app *app,int32_t cmd){
+	struct state *state=app->userData;
 	switch(cmd){
+		case APP_CMD_RESUME:
+			init_vibrate(app,&state->vibrate);
+			hidenavbars(&((struct state*)app->userData)->vibrate);
+			break;
+		case APP_CMD_PAUSE:
+			term_vibrate(&state->vibrate);
+			break;
 		case APP_CMD_INIT_WINDOW:
 			init_display(app->userData);
 			break;
@@ -118,11 +127,13 @@ void android_main(struct android_app *app){
 	app->onInputEvent=inputproc;
 	init(&state);
 	reset(&state);
-	init_vibrate(app->activity->vm,app->activity->env,app->activity->clazz,&state.vibrate);
+	//init_vibrate(app,&state.vibrate);
 	while(process(app)&&core(&state)){
 		render(&state);
 		eglSwapBuffers(state.display,state.surface);
 	}
+	logcat("before detach");
 	term_vibrate(&state.vibrate);
+	logcat("after detach");
 	logcat("--- END LOG ---");
 }
