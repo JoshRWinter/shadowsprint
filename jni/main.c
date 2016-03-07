@@ -46,7 +46,7 @@ void init_display(struct state *state){
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glClearColor(1.0f,1.0f,1.0f,1.0f);
 	set_ftfont_params(2560,1440,state->rect.right*2.0f,state->rect.bottom*2.0f,state->uniform.vector,state->uniform.size,state->uniform.texcoords);
-	state->font.main=create_ftfont(state->app->activity->assetManager,0.5f,"corbel.ttf");
+	state->font.main=create_ftfont(state->app->activity->assetManager,0.425f,"corbel.ttf");
 	state->font.header=create_ftfont(state->app->activity->assetManager,0.9f,"BAUHS93.TTF");
 	state->font.symbol=create_ftfont(state->app->activity->assetManager,0.6f,"WINGDNG3.TTF");
 }

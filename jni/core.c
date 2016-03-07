@@ -239,7 +239,7 @@ void render(struct state *state){
 			draw(state,&blast->base,blast->frame,blast->xv>0.0f?false:true);
 	}
 	
-	glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON2].object);
+	glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 	uidraw(state,&state->lbutton,state->lbuttonstate);
 	uidraw(state,&state->rbutton,state->rbuttonstate);
 	uidraw(state,&state->jbutton,state->jbuttonstate);
@@ -247,15 +247,15 @@ void render(struct state *state){
 	
 	glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
 	glBindTexture(GL_TEXTURE_2D,state->font.symbol->atlas);
-	drawtextcentered(state->font.symbol,state->lbutton.x+(BUTTONSMALL_SIZE/2.0f),
-	state->lbutton.y+(BUTTONSMALL_SIZE/2.0f)-(state->font.symbol->fontsize/2.0f),"W"); // wingdings3 left
-	drawtextcentered(state->font.symbol,state->rbutton.x+(BUTTONSMALL_SIZE/2.0f),
-	state->rbutton.y+(BUTTONSMALL_SIZE/2.0f)-(state->font.symbol->fontsize/2.0f),"X"); // wingdings3 right
-	drawtextcentered(state->font.symbol,state->jbutton.x+(BUTTONSMALL_SIZE/2.0f),
-	state->jbutton.y+(BUTTONSMALL_SIZE/2.0f)-(state->font.symbol->fontsize/2.0f),"S"); // wingdings3 up
+	drawtextcentered(state->font.symbol,state->lbutton.x+(BUTTON_WIDTH/2.0f),
+	state->lbutton.y+(BUTTON_HEIGHT/2.0f)-(state->font.symbol->fontsize/2.0f)+(state->lbuttonstate?0.0f:-0.1f),"W"); // wingdings3 left
+	drawtextcentered(state->font.symbol,state->rbutton.x+(BUTTON_WIDTH/2.0f),
+	state->rbutton.y+(BUTTON_HEIGHT/2.0f)-(state->font.symbol->fontsize/2.0f)+(state->rbuttonstate?0.0f:-0.1f),"X"); // wingdings3 right
+	drawtextcentered(state->font.symbol,state->jbutton.x+(BUTTON_WIDTH/2.0f),
+	state->jbutton.y+(BUTTON_HEIGHT/2.0f)-(state->font.symbol->fontsize/2.0f)+(state->jbuttonstate?0.0f:-0.1f),"S"); // wingdings3 up
 	glBindTexture(GL_TEXTURE_2D,state->font.header->atlas);
-	drawtextcentered(state->font.header,state->fbutton.x+(BUTTONSMALL_SIZE/2.0f),
-	state->fbutton.y+(BUTTONSMALL_SIZE/2.0f)-(state->font.header->fontsize/2.0f),"X");
+	drawtextcentered(state->font.header,state->fbutton.x+(BUTTON_WIDTH/2.0f),
+	state->fbutton.y+(BUTTON_HEIGHT/2.0f)-(state->font.header->fontsize/2.0f)+(state->fbuttonstate?0.0f:-0.1f),"X");
 	
 	{
 		static int fps,lasttime=0;
@@ -278,11 +278,11 @@ void init(struct state *state){
 	state->rect.left=-(state->rect.right=8.0f);
 	state->rect.top=-(state->rect.bottom=4.5f);
 	state->background=(struct base){state->rect.left,state->rect.top,state->rect.right*2.0f,state->rect.bottom*2.0f,0.0f,1.0f};
-	state->lbutton=(struct base){-7.0f,2.0f,BUTTONSMALL_SIZE,BUTTONSMALL_SIZE,0.0f,2.0f};
-	state->rbutton=(struct base){-4.75f,2.0f,BUTTONSMALL_SIZE,BUTTONSMALL_SIZE,0.0f,2.0f};
-	state->jbutton=(struct base){5.75f,2.0f,BUTTONSMALL_SIZE,BUTTONSMALL_SIZE,0.0f,2.0f};
-	state->fbutton=(struct base){5.75f,-0.25f,BUTTONSMALL_SIZE,BUTTONSMALL_SIZE,0.0f,2.0f};
-	state->buttonframe=(struct base){state->rect.right-3.8125f,state->rect.top,3.8125f,state->rect.bottom*2.0f,0.0f,1.0f};
+	state->lbutton=(struct base){-7.5f,2.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f};
+	state->rbutton=(struct base){-5.25f,2.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f};
+	state->jbutton=(struct base){5.75f,2.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f};
+	state->fbutton=(struct base){5.75f,-0.25f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f};
+	state->buttonframe=(struct base){state->rect.right-1.25f,state->rect.top,1.25f,state->rect.bottom*2.0f,0.0f,1.0f};
 	state->lava=(struct base){state->rect.left,3.75f,state->rect.right*2.0f,0.75f,0.0f,1.0f};
 	state->player.base.w=PLAYER_WIDTH;
 	state->player.base.h=PLAYER_HEIGHT;

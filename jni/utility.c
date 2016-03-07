@@ -34,6 +34,7 @@ int buttonprocess1(struct state *state,struct button *button){
 			return BUTTON_PRESS;
 		}
 	}
+	button->active=false;
 	return 0;
 }
 int buttonprocess(struct state *state,struct button *button){
@@ -49,7 +50,7 @@ int buttondraw(struct state *state,struct button *button){
 	return bstate;
 }
 void buttondrawtext(ftfont* font,struct button *button){
-	drawtextcentered(font,button->base.x+(button->base.w/2.0f),button->base.y+(button->base.h/2.0f)-(font->fontsize/2.0f),button->label);
+	drawtextcentered(font,button->base.x+(button->base.w/2.0f),button->base.y+(button->base.h/2.0f)-(font->fontsize/2.0f)+(button->active?0.0f:-0.1f),button->label);
 }
 
 int pointing0(struct crosshair *pointer,struct base *base){

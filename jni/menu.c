@@ -7,12 +7,12 @@ int menu_main(struct state *state){
 	vibratedevice(&state->jni_info,30);
 	const char *aboottext=
 	"Shadow Sprint\nProgrammed by Josh Winter\n\nFonts:\nCorbel\nBAUHAUS93";
-	const float bleftoffset=4.5f;
-	const float btopoffset=-3.85f;
+	const float bleftoffset=5.8f;
+	const float btopoffset=-4.175f;
 	struct button playbutton={{bleftoffset,btopoffset,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Play",false};
-	struct button abootbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.25f)),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Aboot",false};
-	struct button configbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.25f)*2.0f),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Settings",false};
-	struct button quitbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.25f)*3.0f),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Quit",false};
+	struct button abootbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.1f)),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Aboot",false};
+	struct button configbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.1f)*2.0f),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Settings",false};
+	struct button quitbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.1f)*3.0f),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Quit",false};
 	while(process(state->app)){
 		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BACKGROUND].object);
@@ -48,8 +48,8 @@ int menu_main(struct state *state){
 }
 
 int menu_message(struct state *state,const char *caption,const char *msg,int *yesno){
-	struct button okbutton={{4.5f,-BUTTON_HEIGHT/2.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Mmmkay",false};
-	struct button yesbutton={{4.5f,-2.0,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Yes",false};
+	struct button okbutton={{5.8f,-BUTTON_HEIGHT/2.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Mmkay",false};
+	struct button yesbutton={{5.8f,-2.0,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Yes",false};
 	struct button nobutton={{4.5f,0.25f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"No",false};
 	while(process(state->app)){
 		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);

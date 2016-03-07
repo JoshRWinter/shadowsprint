@@ -20,8 +20,7 @@
 //ui
 #define TID_BACKGROUND 0
 #define TID_BUTTON 1
-#define TID_BUTTON2 2
-#define TID_BUTTONFRAME 3
+#define TID_BUTTONFRAME 2
 
 struct base{
 	float x,y,w,h,rot,count;
@@ -89,9 +88,8 @@ struct cloud{
 	struct cloud *next;
 };
 
-#define BUTTON_WIDTH 3.3f
-#define BUTTON_HEIGHT 1.75f
-#define BUTTONSMALL_SIZE 2.0f
+#define BUTTON_WIDTH 1.9f
+#define BUTTON_HEIGHT 2.0666f
 #define BUTTON_PRESS 1
 #define BUTTON_ACTIVATE 2
 struct button{
