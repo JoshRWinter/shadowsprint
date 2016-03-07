@@ -21,6 +21,7 @@
 #define TID_BACKGROUND 0
 #define TID_BUTTON 1
 #define TID_BUTTONFRAME 2
+#define TID_SYMBOL 3
 
 struct base{
 	float x,y,w,h,rot,count;
@@ -108,7 +109,7 @@ struct state{
 	EGLSurface surface;
 	EGLContext context;
 	struct{int vector,size,texcoords,rot,rgba,projection;}uniform;
-	struct{ftfont *main,*header,*symbol;}font;
+	struct{ftfont *main,*header;}font;
 	struct{float left,right,bottom,top;}rect;
 	struct crosshair pointer[2];
 	struct device device;
@@ -116,7 +117,8 @@ struct state{
 	struct base background,lava,buttonframe;
 	struct block block[BLOCK_COUNT];
 	struct base lbutton,rbutton,jbutton,fbutton;
-	int lbuttonstate,rbuttonstate,jbuttonstate,fbuttonstate;
+	struct button pbutton;
+	int lbuttonstate,rbuttonstate,jbuttonstate,fbuttonstate,pbuttonstate;
 	struct player player;
 	struct blast *blastlist;
 	struct particle *particlelist;

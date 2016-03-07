@@ -178,6 +178,10 @@ int core(struct state *state){
 	if((state->fbuttonstate=pointing(state->pointer,&state->fbutton))&&!state->player.reload){
 		newblast(state);
 	}
+	if((state->pbuttonstate=buttonprocess(state,&state->pbutton))==BUTTON_ACTIVATE){
+		reset(state);
+		state->showmenu=true;
+	}
 	return true;
 }
 
@@ -244,18 +248,15 @@ void render(struct state *state){
 	uidraw(state,&state->rbutton,state->rbuttonstate);
 	uidraw(state,&state->jbutton,state->jbuttonstate);
 	uidraw(state,&state->fbutton,state->fbuttonstate);
+	buttondraw(state,&state->pbutton);
 	
 	glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
-	glBindTexture(GL_TEXTURE_2D,state->font.symbol->atlas);
-	drawtextcentered(state->font.symbol,state->lbutton.x+(BUTTON_WIDTH/2.0f),
-	state->lbutton.y+(BUTTON_HEIGHT/2.0f)-(state->font.symbol->fontsize/2.0f)+(state->lbuttonstate?0.0f:-0.1f),"W"); // wingdings3 left
-	drawtextcentered(state->font.symbol,state->rbutton.x+(BUTTON_WIDTH/2.0f),
-	state->rbutton.y+(BUTTON_HEIGHT/2.0f)-(state->font.symbol->fontsize/2.0f)+(state->rbuttonstate?0.0f:-0.1f),"X"); // wingdings3 right
-	drawtextcentered(state->font.symbol,state->jbutton.x+(BUTTON_WIDTH/2.0f),
-	state->jbutton.y+(BUTTON_HEIGHT/2.0f)-(state->font.symbol->fontsize/2.0f)+(state->jbuttonstate?0.0f:-0.1f),"S"); // wingdings3 up
-	glBindTexture(GL_TEXTURE_2D,state->font.header->atlas);
-	drawtextcentered(state->font.header,state->fbutton.x+(BUTTON_WIDTH/2.0f),
-	state->fbutton.y+(BUTTON_HEIGHT/2.0f)-(state->font.header->fontsize/2.0f)+(state->fbuttonstate?0.0f:-0.1f),"X");
+	glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_SYMBOL].object);
+	uidraw(state,&(struct base){state->lbutton.x+(BUTTON_WIDTH/2.0f)-0.5f,state->lbutton.y+(BUTTON_WIDTH/2.0f)-0.5f+(state->lbuttonstate?0.1f:0.0f),1.0f,1.0f,0.0f,5.0f},0);
+	uidraw(state,&(struct base){state->rbutton.x+(BUTTON_WIDTH/2.0f)-0.5f,state->rbutton.y+(BUTTON_WIDTH/2.0f)-0.5f+(state->rbuttonstate?0.1f:0.0f),1.0f,1.0f,0.0f,5.0f},1);
+	uidraw(state,&(struct base){state->jbutton.x+(BUTTON_WIDTH/2.0f)-0.5f,state->jbutton.y+(BUTTON_WIDTH/2.0f)-0.5f+(state->jbuttonstate?0.1f:0.0f),1.0f,1.0f,0.0f,5.0f},2);
+	uidraw(state,&(struct base){state->fbutton.x+(BUTTON_WIDTH/2.0f)-0.5f,state->fbutton.y+(BUTTON_WIDTH/2.0f)-0.5f+(state->fbuttonstate?0.1f:0.0f),1.0f,1.0f,0.0f,5.0f},3);
+	uidraw(state,&(struct base){state->pbutton.base.x+(BUTTON_WIDTH/2.0f)-0.5f,state->pbutton.base.y+(BUTTON_WIDTH/2.0f)-0.5f+(state->pbuttonstate?0.1f:0.0f),1.0f,1.0f,0.0f,5.0f},4);
 	
 	{
 		static int fps,lasttime=0;
@@ -267,7 +268,7 @@ void render(struct state *state){
 		}
 		++fps;
 		glBindTexture(GL_TEXTURE_2D,state->font.main->atlas);
-		drawtext(state->font.main,state->rect.left+0.1f,state->rect.top+0.1f,fpsstring);
+		drawtext(state->font.main,state->rect.left+3.0f,state->rect.top+0.1f,fpsstring);
 	}
 }
 
@@ -282,6 +283,7 @@ void init(struct state *state){
 	state->rbutton=(struct base){-5.25f,2.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f};
 	state->jbutton=(struct base){5.75f,2.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f};
 	state->fbutton=(struct base){5.75f,-0.25f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f};
+	state->pbutton=(struct button){{-7.5f,-4.3f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"",false};
 	state->buttonframe=(struct base){state->rect.right-1.25f,state->rect.top,1.25f,state->rect.bottom*2.0f,0.0f,1.0f};
 	state->lava=(struct base){state->rect.left,3.75f,state->rect.right*2.0f,0.75f,0.0f,1.0f};
 	state->player.base.w=PLAYER_WIDTH;

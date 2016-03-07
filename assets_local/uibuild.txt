@@ -1,1 +1,1 @@
-background.tga button.tga button_frame.tga -o ..\assets\uiassets
+background.tga button.tga button_frame.tga symbols.tga -o ..\assets\uiassets

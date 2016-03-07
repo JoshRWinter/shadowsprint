@@ -4,7 +4,7 @@
 #include "defs.h"
 
 int menu_main(struct state *state){
-	vibratedevice(&state->jni_info,30);
+	//vibratedevice(&state->jni_info,30);
 	const char *aboottext=
 	"Shadow Sprint\nProgrammed by Josh Winter\n\nFonts:\nCorbel\nBAUHAUS93";
 	const float bleftoffset=5.8f;
@@ -45,6 +45,10 @@ int menu_main(struct state *state){
 		eglSwapBuffers(state->display,state->surface);
 	}
 	return false;
+}
+
+int menu_pause(struct state *state){
+	return true;
 }
 
 int menu_message(struct state *state,const char *caption,const char *msg,int *yesno){
