@@ -12,7 +12,6 @@ void init_display(struct state *state){
 	struct device screenres=state->device;
 	if(screenres.w>1920)screenres.w=1920;
 	if(screenres.h>1080)screenres.h=1080;
-	logcat("width: %d\nheight: %d",state->device.w,state->device.h);
 	state->display=eglGetDisplay(EGL_DEFAULT_DISPLAY);
 	eglInitialize(state->display,NULL,NULL);
 	EGLConfig config;

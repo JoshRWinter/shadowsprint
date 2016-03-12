@@ -2,11 +2,12 @@
 #define DATAPATH "/data/data/joshwinter.shadow/files/"
 #define PI 3.14159f
 #define PI2 (2.0f*PI)
-#define TEX_MODE "110110"
+#define TEX_MODE "1101101"
 #define COLLIDE_RIGHT 1
 #define COLLIDE_TOP 2
 #define COLLIDE_LEFT 3
 #define GRAVITY 0.02f
+#define LAVA_Y 3.75f
 #define torad(x) (x*(PI/180.0f))
 
 // gameplay
@@ -16,6 +17,7 @@
 #define TID_BLAST 3
 #define TID_SHOCKWAVE 4
 #define TID_CLOUD 5
+#define TID_FLARE  6
 
 //ui
 #define TID_BACKGROUND 0
@@ -68,6 +70,7 @@ struct particle{
 #define SHOCKWAVE_FADE 0.05f
 struct shockwave{
 	struct base base;
+	int black;
 	float alpha;
 	struct shockwave *next;
 };
@@ -75,8 +78,17 @@ struct shockwave{
 #define SMOKE_SIZE 0.1f
 struct smoke{
 	struct base base;
+	int black;
 	float alpha;
 	struct smoke *next;
+};
+
+#define FLARE_SIZE 0.5f
+struct flare{
+	struct base base;
+	float xv,yv;
+	int frame;
+	struct flare *next;
 };
 
 #define CLOUD_WIDTH 4.5f
@@ -124,6 +136,7 @@ struct state{
 	struct particle *particlelist;
 	struct shockwave *shockwavelist;
 	struct smoke *smokelist;
+	struct flare *flarelist;
 	struct cloud *cloudlist;
 };
 
@@ -149,9 +162,11 @@ void newblast(struct state*);
 struct blast *deleteblast(struct state*,struct blast*,struct blast*);
 void newparticle(struct state *state,float,float,int);
 struct particle *deleteparticle(struct state*,struct particle*,struct particle*);
-void newshockwave(struct state*,float,float);
+void newshockwave(struct state*,float,float,int);
 struct shockwave *deleteshockwave(struct state*,struct shockwave*,struct shockwave*);
 void newsmoke(struct state*,struct base*);
 struct smoke *deletesmoke(struct state*,struct smoke*,struct smoke*);
+void newflare(struct state *state,int);
+struct flare *deleteflare(struct state*,struct flare*,struct flare*);
 void newcloud(struct state*);
 struct cloud *deletecloud(struct state*,struct cloud*,struct cloud*);

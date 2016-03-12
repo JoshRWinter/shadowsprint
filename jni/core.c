@@ -143,6 +143,50 @@ int core(struct state *state){
 		smoke=smoke->next;
 	}
 	
+	for(struct flare *flare=state->flarelist,*prevflare=NULL;flare!=NULL;){
+		if(flare->xv>0.0f&&flare->base.y>state->rect.bottom){
+			flare=deleteflare(state,flare,prevflare);
+			continue;
+		}
+		flare->base.x+=flare->xv;
+		if(flare->base.y+flare->base.h<LAVA_Y){
+			flare->base.y+=flare->yv;
+			if((flare->yv+=0.005f)>0.3f)flare->yv=0.3f;
+		}
+		else flare->base.y+=flare->yv>0.0f?0.05f:-0.05f;
+		flare->base.rot+=flare->xv*1.5f;
+		if(flare->base.rot>PI2)flare->base.rot=0.0f;
+		else if(flare->base.rot<0.0f)flare->base.rot=PI2;
+		if(++flare->frame>60)flare->frame=0;
+		int side;
+		int stop=false;
+		if(onein(4))newsmoke(state,&flare->base);
+		for(int i=0;i<BLOCK_COUNT;++i){
+			if(state->block[i].hidden)continue;
+			if(side=correct(&flare->base,&state->block[i].base)){
+				switch(side){
+					case COLLIDE_TOP:
+						newshockwave(state,flare->base.x+(FLARE_SIZE/2.0f),state->block[i].base.y,false);
+						flare=deleteflare(state,flare,prevflare);
+						stop=true;
+						break;
+					case COLLIDE_LEFT:
+						flare->base.x=state->block[i].base.x-FLARE_SIZE;
+						flare->xv=-flare->xv;
+						break;
+					case COLLIDE_RIGHT:
+						flare->base.x=state->block[i].base.x+state->block[i].base.w;
+						flare->xv=-flare->xv;
+						break;
+				}
+				break;
+			}
+		}
+		if(stop)continue;
+		prevflare=flare;
+		flare=flare->next;
+	}
+	
 	int cloudcount=0;
 	for(struct cloud *cloud=state->cloudlist,*prevcloud=NULL;cloud!=NULL;){
 		++cloudcount;
@@ -155,6 +199,10 @@ int core(struct state *state){
 		cloud=cloud->next;
 	}
 	if(onein(200)&&cloudcount<4)newcloud(state);
+	
+	for(int i=1;i<BLOCK_COUNT-1;++i){
+		if(state->block[i].hidden&&onein(200))newflare(state,i);
+	}
 	
 	// buttons
 	state->lbuttonstate=pointing(state->pointer,&state->lbutton);
@@ -212,6 +260,13 @@ void render(struct state *state){
 	}
 	
 	glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
+	if(state->flarelist){
+		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_FLARE].object);
+		for(struct flare *flare=state->flarelist;flare!=NULL;flare=flare->next)
+			draw(state,&flare->base,flare->frame>30,false);
+	}
+	
+	glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_PLAYER].object);
 	draw(state,&state->player.base,state->player.frame,state->player.xinvert);
 	
@@ -224,14 +279,16 @@ void render(struct state *state){
 	
 	for(struct smoke *smoke=state->smokelist;smoke!=NULL;smoke=smoke->next){
 		if(!state->particlelist)glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
-		glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,smoke->alpha);
+		if(smoke->black)glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,smoke->alpha);
+		else glUniform4f(state->uniform.rgba,1.0f,0.416f,0.0f,smoke->alpha);
 		draw(state,&smoke->base,0,false);
 	}
 	
 	if(state->shockwavelist){
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_SHOCKWAVE].object);
 		for(struct shockwave *shockwave=state->shockwavelist;shockwave!=NULL;shockwave=shockwave->next){
-			glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,shockwave->alpha);
+			if(shockwave->black)glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,shockwave->alpha);
+			else glUniform4f(state->uniform.rgba,1.0f,0.416f,0.0f,shockwave->alpha);
 			draw(state,&shockwave->base,0,false);
 		}
 	}
@@ -285,7 +342,7 @@ void init(struct state *state){
 	state->fbutton=(struct base){5.75f,-0.25f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f};
 	state->pbutton=(struct button){{-7.5f,-4.3f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"",false};
 	state->buttonframe=(struct base){state->rect.right-1.25f,state->rect.top,1.25f,state->rect.bottom*2.0f,0.0f,1.0f};
-	state->lava=(struct base){state->rect.left,3.75f,state->rect.right*2.0f,0.75f,0.0f,1.0f};
+	state->lava=(struct base){state->rect.left,LAVA_Y,state->rect.right*2.0f,state->rect.bottom-LAVA_Y,0.0f,1.0f};
 	state->player.base.w=PLAYER_WIDTH;
 	state->player.base.h=PLAYER_HEIGHT;
 	state->player.base.count=8.0f;
@@ -293,6 +350,7 @@ void init(struct state *state){
 	state->particlelist=NULL;
 	state->shockwavelist=NULL;
 	state->smokelist=NULL;
+	state->flarelist=NULL;
 	state->cloudlist=NULL;
 }
 void reset(struct state *state){
@@ -300,6 +358,7 @@ void reset(struct state *state){
 	for(struct particle *particle=state->particlelist;particle!=NULL;particle=deleteparticle(state,particle,NULL));
 	for(struct shockwave *shockwave=state->shockwavelist;shockwave!=NULL;shockwave=deleteshockwave(state,shockwave,NULL));
 	for(struct smoke *smoke=state->smokelist;smoke!=NULL;smoke=deletesmoke(state,smoke,NULL));
+	for(struct flare *flare=state->flarelist;flare!=NULL;flare=deleteflare(state,flare,NULL));
 	for(struct cloud *cloud=state->cloudlist;cloud!=NULL;cloud=deletecloud(state,cloud,NULL));
 	newblocks(state);
 	state->player.base.x=0.0f;

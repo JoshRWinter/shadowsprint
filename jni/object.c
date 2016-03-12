@@ -60,7 +60,7 @@ struct blast *deleteblast(struct state *state,struct blast *blast,struct blast *
 
 void newparticle(struct state *state,float x,float y,int count){
 	const float PARTICLE_SPEED=3.8f;
-	newshockwave(state,x,y);
+	newshockwave(state,x,y,true);
 	for(int i=0;i<count;++i){
 		float angle=torad(randomint(1,360));
 		struct particle *particle=malloc(sizeof(struct particle));
@@ -85,7 +85,7 @@ struct particle *deleteparticle(struct state *state,struct particle *particle,st
 	return temp;
 }
 
-void newshockwave(struct state *state,float x,float y){
+void newshockwave(struct state *state,float x,float y,int black){
 	struct shockwave *shockwave=malloc(sizeof(struct shockwave));
 	shockwave->base.w=0.0f;
 	shockwave->base.h=0.0f;
@@ -93,6 +93,7 @@ void newshockwave(struct state *state,float x,float y){
 	shockwave->base.y=y;
 	shockwave->base.rot=0.0f;
 	shockwave->base.count=1.0f;
+	shockwave->black=black;
 	shockwave->alpha=1.0f;
 	shockwave->next=state->shockwavelist;
 	state->shockwavelist=shockwave;
@@ -114,6 +115,10 @@ void newsmoke(struct state *state,struct base *base){
 	smoke->base.y=base->y+(randomint(0.0f,base->h*10.0f)/10.0f);
 	smoke->base.rot=0.0f;
 	smoke->base.count=1.0f;
+	if(base->count==2.0f){ // flare
+		smoke->black=false;
+	}
+	else smoke->black=true;
 	smoke->alpha=randomint(60,80)/100.0f;
 	smoke->next=state->smokelist;
 	state->smokelist=smoke;
@@ -123,6 +128,28 @@ struct smoke *deletesmoke(struct state *state,struct smoke *smoke,struct smoke *
 	else state->smokelist=smoke->next;
 	void *temp=smoke->next;
 	free(smoke);
+	return temp;
+}
+
+void newflare(struct state *state,int index){
+	struct flare *flare=malloc(sizeof(struct flare));
+	flare->base.w=FLARE_SIZE;
+	flare->base.h=FLARE_SIZE;
+	flare->base.x=randomint(state->block[index].base.x*10.0f,(state->block[index].base.x+state->block[index].base.w-FLARE_SIZE)*10.0f)/10.0f;
+	flare->base.y=state->rect.bottom;
+	flare->base.rot=torad(randomint(1,360));
+	flare->base.count=2.0f;
+	flare->xv=randomint(-3,3)/100.0f;
+	flare->yv=-0.225f;
+	flare->frame=0;
+	flare->next=state->flarelist;
+	state->flarelist=flare;
+}
+struct flare *deleteflare(struct state *state,struct flare *flare,struct flare *prev){
+	if(prev!=NULL)prev->next=flare->next;
+	else state->flarelist=flare->next;
+	void *temp=flare->next;
+	free(flare);
 	return temp;
 }
 
