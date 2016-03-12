@@ -7,7 +7,6 @@
 int core(struct state *state){
 	if(state->showmenu){
 		if(!menu_main(state))return false;
-		state->showmenu=false;
 	}
 	if(state->back){
 		state->back=false;
@@ -181,6 +180,7 @@ int core(struct state *state){
 	if((state->pbuttonstate=buttonprocess(state,&state->pbutton))==BUTTON_ACTIVATE){
 		reset(state);
 		state->showmenu=true;
+		return menu_main(state);
 	}
 	return true;
 }

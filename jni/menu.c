@@ -13,6 +13,7 @@ int menu_main(struct state *state){
 	struct button abootbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.1f)),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Aboot",false};
 	struct button configbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.1f)*2.0f),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Settings",false};
 	struct button quitbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.1f)*3.0f),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Quit",false};
+	state->showmenu=false;
 	while(process(state->app)){
 		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BACKGROUND].object);

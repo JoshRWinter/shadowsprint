@@ -32,8 +32,8 @@ struct base{
 #define PLAYER_FRAME_TIMER 4
 #define PLAYER_MAX_SPEED 0.1f
 #define PLAYER_ACCELERATE 0.01f
-#define PLAYER_WIDTH 1.0125f
-#define PLAYER_HEIGHT 1.3875f
+#define PLAYER_WIDTH 1.0166f
+#define PLAYER_HEIGHT 1.3833f
 struct player{
 	struct base base;
 	float xv,yv;
