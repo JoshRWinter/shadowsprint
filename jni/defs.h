@@ -42,6 +42,15 @@ struct player{
 	int lives,canjump,frame,frametimer,xinvert,reload;
 };
 
+#define ENEMY_WIDTH 1.0f
+#define ENEMY_HEIGHT 1.0f
+#define ENEMY_SPEED 0.065f
+struct enemy{
+	struct base base;
+	float xv,yv;
+	struct enemy *next;
+};
+
 #define BLOCK_COUNT 40
 struct block{
 	struct base base;
@@ -132,6 +141,7 @@ struct state{
 	struct button pbutton;
 	int lbuttonstate,rbuttonstate,jbuttonstate,fbuttonstate,pbuttonstate;
 	struct player player;
+	struct enemy *enemylist;
 	struct blast *blastlist;
 	struct particle *particlelist;
 	struct shockwave *shockwavelist;
@@ -160,6 +170,8 @@ int menu_message(struct state*,const char*,const char*,int*);
 void newblocks(struct state*);
 void newblast(struct state*);
 struct blast *deleteblast(struct state*,struct blast*,struct blast*);
+void newenemy(struct state*,int);
+struct enemy *deleteenemy(struct state*,struct enemy*,struct enemy*);
 void newparticle(struct state *state,float,float,int);
 struct particle *deleteparticle(struct state*,struct particle*,struct particle*);
 void newshockwave(struct state*,float,float,int);

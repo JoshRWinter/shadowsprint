@@ -34,6 +34,27 @@ void newblocks(struct state *state){
 	}
 }
 
+void newenemy(struct state *state,int index){
+	struct enemy *enemy=malloc(sizeof(struct enemy));
+	enemy->base.w=ENEMY_WIDTH;
+	enemy->base.h=ENEMY_HEIGHT;
+	enemy->base.x=state->block[index].base.x;
+	enemy->base.y=state->block[index].base.y-ENEMY_HEIGHT;
+	enemy->base.rot=0.0f;
+	enemy->base.count=1.0f;
+	enemy->xv=onein(2)?ENEMY_SPEED:-ENEMY_SPEED;
+	enemy->yv=0.0f;
+	enemy->next=state->enemylist;
+	state->enemylist=enemy;
+}
+struct enemy *deleteenemy(struct state *state,struct enemy *enemy,struct enemy *prev){
+	if(prev!=NULL)prev->next=enemy->next;
+	else state->enemylist=enemy->next;
+	void *temp=enemy->next;
+	free(enemy);
+	return temp;
+}
+
 void newblast(struct state *state){
 	state->player.reload=PLAYER_RELOAD;
 	struct blast *blast=malloc(sizeof(struct blast));

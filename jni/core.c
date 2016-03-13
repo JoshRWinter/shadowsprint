@@ -54,6 +54,60 @@ int core(struct state *state){
 		state->player.frame=0;
 	}
 	
+	for(struct enemy *enemy=state->enemylist,*prevenemy=NULL;enemy!=NULL;){
+		enemy->base.x+=enemy->xv;
+		enemy->base.y+=enemy->yv;
+		enemy->yv+=GRAVITY;
+		enemy->base.rot=enemy->yv;
+		int stop=false,side;
+		for(int i=0;i<BLOCK_COUNT;++i){
+			if(side=correct(&enemy->base,&state->block[i].base)){
+				switch(side){
+					case COLLIDE_TOP:
+						if(enemy->yv>0.0f){
+							enemy->base.y=state->block[i].base.y-ENEMY_HEIGHT;
+							enemy->yv=-0.175f;
+						}
+						break;
+					case COLLIDE_RIGHT:
+						logcat("fuck right");
+						if(state->block[i].hidden)enemy->xv=-enemy->xv;
+						else enemy->yv=-0.25f;
+						enemy->base.x=state->block[i].base.x+state->block[i].base.w;
+						break;
+					case COLLIDE_LEFT:
+						logcat("fuck left");
+						if(state->block[i].hidden)enemy->xv=-enemy->xv;
+						else enemy->yv=-0.25f;
+						enemy->base.x=state->block[i].base.x-ENEMY_WIDTH;
+						break;
+				}
+			}
+		}
+		side=correct(&state->player.base,&enemy->base);
+		if(side==COLLIDE_TOP){
+			newparticle(state,enemy->base.x+(ENEMY_WIDTH/2.0f),enemy->base.y+(ENEMY_HEIGHT/2.0f),20);
+			enemy=deleteenemy(state,enemy,prevenemy);
+			continue;
+		}
+		else if(side==COLLIDE_LEFT||side==COLLIDE_RIGHT){
+		}
+		for(struct blast *blast=state->blastlist,*prevblast=NULL;blast!=NULL;){
+			if(collide(&blast->base,&enemy->base)){
+				newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),20);
+				blast=deleteblast(state,blast,prevblast);
+				enemy=deleteenemy(state,enemy,prevenemy);
+				stop=true;
+				break;
+			}
+			prevblast=blast;
+			blast=blast->next;
+		}
+		if(stop)continue;
+		prevenemy=enemy;
+		enemy=enemy->next;
+	}
+	
 	for(struct blast *blast=state->blastlist,*prevblast=NULL;blast!=NULL;){
 		blast->base.x+=blast->xv;
 		newsmoke(state,&blast->base);
@@ -200,8 +254,10 @@ int core(struct state *state){
 	}
 	if(onein(200)&&cloudcount<4)newcloud(state);
 	
+	int noenemies=!state->enemylist;
 	for(int i=1;i<BLOCK_COUNT-1;++i){
 		if(state->block[i].hidden&&onein(200))newflare(state,i);
+		if(noenemies&&onein(4))newenemy(state,i);
 	}
 	
 	// buttons
@@ -266,7 +322,12 @@ void render(struct state *state){
 			draw(state,&flare->base,flare->frame>30,false);
 	}
 	
-	glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
+	if(state->enemylist){
+		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_ENEMY].object);
+		for(struct enemy *enemy=state->enemylist;enemy!=NULL;enemy=enemy->next)
+			draw(state,&enemy->base,0.0f,enemy->xv>0.0f?true:false);
+	}
+	
 	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_PLAYER].object);
 	draw(state,&state->player.base,state->player.frame,state->player.xinvert);
 	
@@ -346,6 +407,7 @@ void init(struct state *state){
 	state->player.base.w=PLAYER_WIDTH;
 	state->player.base.h=PLAYER_HEIGHT;
 	state->player.base.count=8.0f;
+	state->enemylist=NULL;
 	state->blastlist=NULL;
 	state->particlelist=NULL;
 	state->shockwavelist=NULL;
@@ -354,6 +416,7 @@ void init(struct state *state){
 	state->cloudlist=NULL;
 }
 void reset(struct state *state){
+	for(struct enemy *enemy=state->enemylist;enemy!=NULL;enemy=deleteenemy(state,enemy,NULL));
 	for(struct blast *blast=state->blastlist;blast!=NULL;blast=deleteblast(state,blast,NULL));
 	for(struct particle *particle=state->particlelist;particle!=NULL;particle=deleteparticle(state,particle,NULL));
 	for(struct shockwave *shockwave=state->shockwavelist;shockwave!=NULL;shockwave=deleteshockwave(state,shockwave,NULL));
