@@ -55,7 +55,9 @@ int core(struct state *state){
 	}
 	
 	for(struct enemy *enemy=state->enemylist,*prevenemy=NULL;enemy!=NULL;){
-		enemy->base.x+=enemy->xv;
+		if(enemy->text.timer)--enemy->text.timer;
+		if(enemy->xv>0)enemy->base.x+=enemy->attack?ENEMY_ATTACK_SPEED:ENEMY_SPEED;
+		else enemy->base.x+=enemy->attack?-ENEMY_ATTACK_SPEED:-ENEMY_SPEED;
 		enemy->base.y+=enemy->yv;
 		enemy->yv+=GRAVITY;
 		enemy->base.rot=enemy->yv;
@@ -70,13 +72,15 @@ int core(struct state *state){
 						}
 						break;
 					case COLLIDE_RIGHT:
-						logcat("fuck right");
+						enemy->attack=false;
+						enemy->text.timer=0;
 						if(state->block[i].hidden)enemy->xv=-enemy->xv;
 						else enemy->yv=-0.25f;
 						enemy->base.x=state->block[i].base.x+state->block[i].base.w;
 						break;
 					case COLLIDE_LEFT:
-						logcat("fuck left");
+						enemy->attack=false;
+						enemy->text.timer=0;
 						if(state->block[i].hidden)enemy->xv=-enemy->xv;
 						else enemy->yv=-0.25f;
 						enemy->base.x=state->block[i].base.x-ENEMY_WIDTH;
@@ -104,6 +108,31 @@ int core(struct state *state){
 			blast=blast->next;
 		}
 		if(stop)continue;
+		
+		// can they see the player?
+		if(!enemy->attack&&onein(10)&&fabs(enemy->base.x-state->player.base.x)<9.0f){
+			struct base collider={enemy->base.x+(ENEMY_WIDTH/2.0f),enemy->base.y,0.1f,ENEMY_HEIGHT};
+			const float ADVANCE=PLAYER_WIDTH-0.05f;
+			for(int i=0;i<8;++i){
+				for(int j=1;j<BLOCK_COUNT-1;++j){
+					if(state->block[j].hidden){
+						if(collide(&collider,&state->block[j].base)){
+							stop=true;
+							break;
+						}
+					}
+				}
+				if(stop)break;
+				if(collide(&collider,&state->player.base)){
+					enemy->text.timer=200;
+					enemy->text.phrase=getenemyphrase();
+					enemy->attack=true;
+					break;
+				}
+				collider.x+=(enemy->xv>0.0f?ADVANCE:-ADVANCE);
+			}
+		}
+		
 		prevenemy=enemy;
 		enemy=enemy->next;
 	}
@@ -255,9 +284,9 @@ int core(struct state *state){
 	if(onein(200)&&cloudcount<4)newcloud(state);
 	
 	int noenemies=!state->enemylist;
-	for(int i=1;i<BLOCK_COUNT-1;++i){
+	for(int i=4;i<BLOCK_COUNT-1;++i){
 		if(state->block[i].hidden&&onein(200))newflare(state,i);
-		if(noenemies&&onein(4))newenemy(state,i);
+		if(noenemies&&onein(4)&&!state->block[i].hidden)newenemy(state,i);
 	}
 	
 	// buttons
@@ -369,6 +398,17 @@ void render(struct state *state){
 	buttondraw(state,&state->pbutton);
 	
 	glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
+	int bound=false;
+	for(struct enemy *enemy=state->enemylist;enemy!=NULL;enemy=enemy->next){
+		if(enemy->text.timer){
+			if(!bound){
+				glBindTexture(GL_TEXTURE_2D,state->font.dialog->atlas);
+				bound=true;
+			}
+			drawtextcentered(state->font.dialog,enemy->base.x-(state->player.base.x+2.5f),enemy->base.y-1.0f,enemy->text.phrase);
+		}
+	}
+	
 	glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_SYMBOL].object);
 	uidraw(state,&(struct base){state->lbutton.x+(BUTTON_WIDTH/2.0f)-0.5f,state->lbutton.y+(BUTTON_WIDTH/2.0f)-0.5f+(state->lbuttonstate?0.1f:0.0f),1.0f,1.0f,0.0f,5.0f},0);
 	uidraw(state,&(struct base){state->rbutton.x+(BUTTON_WIDTH/2.0f)-0.5f,state->rbutton.y+(BUTTON_WIDTH/2.0f)-0.5f+(state->rbuttonstate?0.1f:0.0f),1.0f,1.0f,0.0f,5.0f},1);
@@ -435,4 +475,5 @@ void reset(struct state *state){
 	state->player.lives=3;
 	state->player.canjump=true;
 	state->player.reload=0;
+	state->player.text.timer=0;
 }

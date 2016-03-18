@@ -4,6 +4,18 @@
 #include <math.h>
 #include "defs.h"
 
+static const char *enemyphrase[]={
+	"I See You!!",
+	"FREEZE!",
+	"STOP RIGHT THERE",
+	"AHHHH",
+	"GET 'EM!",
+	"Boo!"
+};
+const char *getenemyphrase(){
+	return enemyphrase[randomint(0,5)];
+}
+
 int buttonprocess0(struct state *state,struct button *button){
 	if(state->pointer[0].x>button->base.x&&state->pointer[0].x<button->base.x+button->base.w&&
 	state->pointer[0].y>button->base.y&&state->pointer[0].y<button->base.y+button->base.h){

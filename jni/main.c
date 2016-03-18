@@ -49,12 +49,14 @@ void init_display(struct state *state){
 	glClearColor(1.0f,1.0f,1.0f,1.0f);
 	set_ftfont_params(screenres.w,screenres.h,state->rect.right*2.0f,state->rect.bottom*2.0f,state->uniform.vector,state->uniform.size,state->uniform.texcoords);
 	state->font.main=create_ftfont(state->app->activity->assetManager,0.425f,"corbel.ttf");
+	state->font.dialog=create_ftfont(state->app->activity->assetManager,0.65f,"corbel.ttf");
 	state->font.header=create_ftfont(state->app->activity->assetManager,0.9f,"BAUHS93.TTF");
 }
 void term_display(struct state *state){
 	state->running=false;
 	destroy_ftfont(state->font.main);
 	destroy_ftfont(state->font.header);
+	destroy_ftfont(state->font.dialog);
 	destroypack(&state->assets);
 	destroypack(&state->uiassets);
 	glDeleteProgram(state->program);
@@ -128,8 +130,6 @@ void android_main(struct android_app *app){
 		render(&state);
 		eglSwapBuffers(state.display,state.surface);
 	}
-	logcat("before term");
 	term_jni(&state.jni_info);
-	logcat("after_term");
 	logcat("--- END LOG ---");
 }

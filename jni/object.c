@@ -44,6 +44,8 @@ void newenemy(struct state *state,int index){
 	enemy->base.count=1.0f;
 	enemy->xv=onein(2)?ENEMY_SPEED:-ENEMY_SPEED;
 	enemy->yv=0.0f;
+	enemy->attack=false;
+	enemy->text.timer=0;
 	enemy->next=state->enemylist;
 	state->enemylist=enemy;
 }

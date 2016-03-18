@@ -40,14 +40,18 @@ struct player{
 	struct base base;
 	float xv,yv;
 	int lives,canjump,frame,frametimer,xinvert,reload;
+	struct{char *phrase;int timer;}text;
 };
 
 #define ENEMY_WIDTH 1.0f
 #define ENEMY_HEIGHT 1.0f
-#define ENEMY_SPEED 0.065f
+#define ENEMY_SPEED 0.045f
+#define ENEMY_ATTACK_SPEED 0.09f
 struct enemy{
 	struct base base;
 	float xv,yv;
+	int attack; // attack mode
+	struct{const char *phrase;int timer;}text;
 	struct enemy *next;
 };
 
@@ -130,7 +134,7 @@ struct state{
 	EGLSurface surface;
 	EGLContext context;
 	struct{int vector,size,texcoords,rot,rgba,projection;}uniform;
-	struct{ftfont *main,*header;}font;
+	struct{ftfont *main,*header,*dialog;}font;
 	struct{float left,right,bottom,top;}rect;
 	struct crosshair pointer[2];
 	struct device device;
@@ -166,6 +170,7 @@ int collide(struct base*,struct base*);
 int correct(struct base*,struct base*);
 int menu_main(struct state*);
 int menu_message(struct state*,const char*,const char*,int*);
+const char *getenemyphrase();
 
 void newblocks(struct state*);
 void newblast(struct state*);
