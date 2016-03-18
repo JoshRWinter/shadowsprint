@@ -77,11 +77,12 @@ int32_t inputproc(struct android_app *app,AInputEvent *event){
 		int32_t action=AKeyEvent_getAction(event);
 		if(key==AKEYCODE_BACK&&action==AKEY_EVENT_ACTION_UP){
 			state->back=true;
+			return true;
 		}
 		else if(key==AKEYCODE_MENU&&action==AKEY_EVENT_ACTION_UP){
 			reset(state);
+			return true;
 		}
-		return true;
 	}
 	return false;
 }

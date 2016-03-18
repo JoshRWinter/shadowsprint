@@ -134,8 +134,8 @@ void newsmoke(struct state *state,struct base *base){
 	struct smoke *smoke=malloc(sizeof(struct smoke));
 	smoke->base.w=SMOKE_SIZE;
 	smoke->base.h=SMOKE_SIZE;
-	smoke->base.x=base->x;
-	smoke->base.y=base->y+(randomint(0.0f,base->h*10.0f)/10.0f);
+	smoke->base.x=base->x+(base->w/2.0f)+(randomint(-4,4)/50.0f);
+	smoke->base.y=base->y+(base->h/2.0f)+(randomint(-4,4)/50.0f);
 	smoke->base.rot=0.0f;
 	smoke->base.count=1.0f;
 	if(base->count==2.0f){ // flare
@@ -173,6 +173,54 @@ struct flare *deleteflare(struct state *state,struct flare *flare,struct flare *
 	else state->flarelist=flare->next;
 	void *temp=flare->next;
 	free(flare);
+	return temp;
+}
+
+void newsilo(struct state *state,int index){
+	struct silo *silo=malloc(sizeof(struct silo));
+	silo->base.w=SILO_WIDTH;
+	silo->base.h=SILO_HEIGHT;
+	silo->base.x=randomint(state->block[index].base.x*10.0f,(state->block[index].base.x+state->block[index].base.w-SILO_WIDTH)*10.0f)/10.0f;
+	silo->base.y=state->block[index].base.y-SILO_HEIGHT;
+	silo->base.rot=0.0f;
+	silo->base.count=1.0f;
+	silo->health=100;
+	silo->missile=NULL;
+	silo->next=state->silolist;
+	state->silolist=silo;
+}
+struct silo *deletesilo(struct state *state,struct silo *silo,struct silo *prev){
+	if(silo->missile)silo->missile->silo=NULL;
+	if(prev!=NULL)prev->next=silo->next;
+	else state->silolist=silo->next;
+	void *temp=silo->next;
+	free(silo);
+	return temp;
+}
+
+void newmissile(struct state *state,struct silo *silo){
+	struct missile *missile=malloc(sizeof(struct missile));
+	missile->base.w=MISSILE_WIDTH;
+	missile->base.h=MISSILE_HEIGHT;
+	missile->base.x=silo->base.x+(SILO_WIDTH/2.0f)-(MISSILE_WIDTH/2.0f);
+	missile->base.y=silo->base.y+SILO_HEIGHT;
+	missile->base.rot=PI/2.0f;
+	missile->base.count=1.0f;
+	missile->xv=0.0f;
+	missile->yv=-0.05f;
+	missile->ttl=MISSILE_TTL;
+	missile->silo=silo;
+	silo->missile=missile;
+	missile->dead=false;
+	missile->next=state->missilelist;
+	state->missilelist=missile;
+}
+struct missile *deletemissile(struct state *state,struct missile *missile,struct missile *prev){
+	if(missile->silo)missile->silo->missile=NULL;
+	if(prev!=NULL)prev->next=missile->next;
+	else state->missilelist=missile->next;
+	void *temp=missile->next;
+	free(missile);
 	return temp;
 }
 

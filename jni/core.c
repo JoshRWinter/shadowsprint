@@ -160,6 +160,23 @@ int core(struct state *state){
 			}
 		}
 		if(stop)continue;
+		for(struct silo *silo=state->silolist,*prevsilo=NULL;silo!=NULL;){
+			if(collide(&blast->base,&silo->base)){
+				if((silo->health-=randomint(40,60))<1){
+					newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),30);
+					silo=deletesilo(state,silo,prevsilo);
+				}
+				else{
+					newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),10);
+				}
+				blast=deleteblast(state,blast,prevblast);
+				stop=true;
+				break;
+			}
+			prevsilo=silo;
+			silo=silo->next;
+		}
+		if(stop)continue;
 		prevblast=blast;
 		blast=blast->next;
 	}
@@ -270,6 +287,83 @@ int core(struct state *state){
 		flare=flare->next;
 	}
 	
+	for(struct silo *silo=state->silolist;silo!=NULL;silo=silo->next){
+		if(fabs((silo->base.x+(SILO_WIDTH/2.0f))-(state->player.base.x+(PLAYER_WIDTH/2.0f)))<SILO_RANGE&&!silo->missile){
+			newmissile(state,silo);
+		}
+	}
+	
+	for(struct missile *missile=state->missilelist,*prevmissile=NULL;missile!=NULL;){
+		if(missile->dead){
+			missile=deletemissile(state,missile,prevmissile);
+			continue;
+		}
+		struct base temp=missile->base;
+		temp.x-=missile->xv*5.0f;
+		temp.w=MISSILE_WIDTH/8.0f;
+		if(!onein(7))newsmoke(state,&missile->base);
+		--missile->ttl;
+		missile->base.x+=missile->xv;
+		missile->base.y+=missile->yv;
+		
+		int stop=false;
+		if(missile->ttl<MISSILE_TTL-60&&missile->ttl>0){
+			if(collide(&missile->base,&state->player.base)){
+				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),30);
+				missile=deletemissile(state,missile,prevmissile);
+				continue;
+			}
+			for(int i=0;i<BLOCK_COUNT;++i){
+				if(collide(&state->block[i].base,&missile->base)&&!state->block[i].hidden){
+					newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30);
+					missile=deletemissile(state,missile,prevmissile);
+					stop=true;
+					break;
+				}
+			}
+			if(stop)continue;
+			float angle=-atan2f((missile->base.y+(MISSILE_HEIGHT/2.0f))-(state->player.base.y+(PLAYER_HEIGHT/1.3f)),
+			(missile->base.x+(MISSILE_WIDTH/2.0f))-(state->player.base.x+(PLAYER_WIDTH/2.0f)));
+			align(&missile->base.rot,0.04,-angle);
+			missile->xv=-cosf(missile->base.rot)*MISSILE_SPEED;
+			missile->yv=-sinf(missile->base.rot)*MISSILE_SPEED;
+		}
+		else if(missile->ttl<1){
+			missile->yv+=GRAVITY;
+			for(int i=0;i<BLOCK_COUNT;++i){
+				if(collide(&state->block[i].base,&missile->base)&&!state->block[i].hidden){
+					newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30);
+					missile=deletemissile(state,missile,prevmissile);
+					stop=true;
+					break;
+				}
+			}
+			if(stop)continue;
+		}
+		
+		for(struct missile *missile2=state->missilelist,*prevmissile2=NULL;missile2!=NULL;){
+			if(missile==missile2){
+				prevmissile2=missile2;
+				missile2=missile2->next;
+				continue;
+			}
+			if(collide(&missile->base,&missile2->base)){
+				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),30);
+				newparticle(state,missile2->base.x+(MISSILE_WIDTH/2.0f),missile2->base.y+(MISSILE_HEIGHT/2.0f),30);
+				missile->dead=true;
+				missile2->dead=true;
+				stop=true;
+				break;
+			}
+			prevmissile2=missile2;
+			missile2=missile2->next;
+		}
+		if(stop)continue;
+		
+		prevmissile=missile;
+		missile=missile->next;
+	}
+	
 	int cloudcount=0;
 	for(struct cloud *cloud=state->cloudlist,*prevcloud=NULL;cloud!=NULL;){
 		++cloudcount;
@@ -283,10 +377,26 @@ int core(struct state *state){
 	}
 	if(onein(200)&&cloudcount<4)newcloud(state);
 	
-	int noenemies=!state->enemylist;
-	for(int i=4;i<BLOCK_COUNT-1;++i){
+	for(int i=0;i<BLOCK_COUNT;++i){
 		if(state->block[i].hidden&&onein(200))newflare(state,i);
-		if(noenemies&&onein(4)&&!state->block[i].hidden)newenemy(state,i);
+	}
+	
+	if(state->populate){
+		state->populate=false;
+		int enemycount=0;
+		int silocount=0;
+		do{
+			for(int i=5;i<BLOCK_COUNT-1;++i){
+				if(onein(4)&&!state->block[i].hidden&&enemycount<ENEMY_COUNT){
+					newenemy(state,i);
+					++enemycount;
+				}
+				if(onein(8)&&!state->block[i].hidden&&silocount<SILO_COUNT){
+					newsilo(state,i);
+					++silocount;
+				}
+			}
+		}while(silocount<SILO_COUNT||enemycount<ENEMY_COUNT);
 	}
 	
 	// buttons
@@ -349,6 +459,18 @@ void render(struct state *state){
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_FLARE].object);
 		for(struct flare *flare=state->flarelist;flare!=NULL;flare=flare->next)
 			draw(state,&flare->base,flare->frame>30,false);
+	}
+	
+	if(state->missilelist){
+		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_MISSILE].object);
+		for(struct missile *missile=state->missilelist;missile!=NULL;missile=missile->next)
+			draw(state,&missile->base,0.0f,false);
+	}
+	
+	if(state->silolist){
+		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_SILO].object);
+		for(struct silo *silo=state->silolist;silo!=NULL;silo=silo->next)
+			draw(state,&silo->base,0.0f,false);
 	}
 	
 	if(state->enemylist){
@@ -453,6 +575,8 @@ void init(struct state *state){
 	state->shockwavelist=NULL;
 	state->smokelist=NULL;
 	state->flarelist=NULL;
+	state->silolist=NULL;
+	state->missilelist=NULL;
 	state->cloudlist=NULL;
 }
 void reset(struct state *state){
@@ -462,8 +586,11 @@ void reset(struct state *state){
 	for(struct shockwave *shockwave=state->shockwavelist;shockwave!=NULL;shockwave=deleteshockwave(state,shockwave,NULL));
 	for(struct smoke *smoke=state->smokelist;smoke!=NULL;smoke=deletesmoke(state,smoke,NULL));
 	for(struct flare *flare=state->flarelist;flare!=NULL;flare=deleteflare(state,flare,NULL));
+	for(struct silo *silo=state->silolist;silo!=NULL;silo=deletesilo(state,silo,NULL));
+	for(struct missile *missile=state->missilelist;missile!=NULL;missile=deletemissile(state,missile,NULL));
 	for(struct cloud *cloud=state->cloudlist;cloud!=NULL;cloud=deletecloud(state,cloud,NULL));
 	newblocks(state);
+	state->populate=true;
 	state->player.base.x=0.0f;
 	state->player.base.y=state->block[1].base.y-PLAYER_HEIGHT;
 	state->player.xv=0.0f;

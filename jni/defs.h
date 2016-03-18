@@ -2,7 +2,7 @@
 #define DATAPATH "/data/data/joshwinter.shadow/files/"
 #define PI 3.14159f
 #define PI2 (2.0f*PI)
-#define TEX_MODE "1101101"
+#define TEX_MODE "110110111"
 #define COLLIDE_RIGHT 1
 #define COLLIDE_TOP 2
 #define COLLIDE_LEFT 3
@@ -18,6 +18,8 @@
 #define TID_SHOCKWAVE 4
 #define TID_CLOUD 5
 #define TID_FLARE  6
+#define TID_SILO 7
+#define TID_MISSILE 8
 
 //ui
 #define TID_BACKGROUND 0
@@ -47,6 +49,7 @@ struct player{
 #define ENEMY_HEIGHT 1.0f
 #define ENEMY_SPEED 0.045f
 #define ENEMY_ATTACK_SPEED 0.09f
+#define ENEMY_COUNT 8
 struct enemy{
 	struct base base;
 	float xv,yv;
@@ -104,6 +107,30 @@ struct flare{
 	struct flare *next;
 };
 
+#define SILO_WIDTH 1.0f
+#define SILO_HEIGHT 0.5f
+#define SILO_RANGE 5.0f
+#define SILO_COUNT 5
+struct missile;
+struct silo{
+	struct base base;
+	struct missile *missile;
+	int health;
+	struct silo *next;
+};
+
+#define MISSILE_WIDTH 0.7f
+#define MISSILE_HEIGHT 0.5f
+#define MISSILE_TTL 420
+#define MISSILE_SPEED 0.06f
+struct missile{
+	struct base base;
+	float xv,yv;
+	int ttl,dead;
+	struct silo *silo;
+	struct missile *next;
+};
+
 #define CLOUD_WIDTH 4.5f
 #define CLOUD_HEIGHT 3.0f
 #define CLOUD_BOUND -12.0f
@@ -125,7 +152,7 @@ struct button{
 };
 
 struct state{
-	int running,showmenu,back,musicenabled,soundenabled,vibenabled;
+	int running,populate,showmenu,back,musicenabled,soundenabled,vibenabled;
 	unsigned vao,vbo,program;
 	struct pack assets,uiassets;
 	struct apack aassets;
@@ -151,6 +178,8 @@ struct state{
 	struct shockwave *shockwavelist;
 	struct smoke *smokelist;
 	struct flare *flarelist;
+	struct silo *silolist;
+	struct missile *missilelist;
 	struct cloud *cloudlist;
 };
 
@@ -185,5 +214,9 @@ void newsmoke(struct state*,struct base*);
 struct smoke *deletesmoke(struct state*,struct smoke*,struct smoke*);
 void newflare(struct state *state,int);
 struct flare *deleteflare(struct state*,struct flare*,struct flare*);
+void newsilo(struct state*,int);
+struct silo *deletesilo(struct state*,struct silo*,struct silo*);
+void newmissile(struct state*,struct silo*);
+struct missile *deletemissile(struct state*,struct missile*,struct missile*);
 void newcloud(struct state*);
 struct cloud *deletecloud(struct state*,struct cloud*,struct cloud*);
