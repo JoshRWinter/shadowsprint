@@ -8,6 +8,8 @@
 #define COLLIDE_LEFT 3
 #define GRAVITY 0.02f
 #define LAVA_Y 3.75f
+#define COLOR_RED 1
+#define COLOR_BLACK 2
 #define torad(x) (x*(PI/180.0f))
 
 // gameplay
@@ -78,7 +80,7 @@ struct blast{
 struct particle{
 	struct base base;
 	float xv,yv;
-	int ttl;
+	int ttl,color;
 	struct particle *next;
 };
 
@@ -86,7 +88,7 @@ struct particle{
 #define SHOCKWAVE_FADE 0.05f
 struct shockwave{
 	struct base base;
-	int black;
+	int color;
 	float alpha;
 	struct shockwave *next;
 };
@@ -94,7 +96,7 @@ struct shockwave{
 #define SMOKE_SIZE 0.1f
 struct smoke{
 	struct base base;
-	int black;
+	int color;
 	float alpha;
 	struct smoke *next;
 };
@@ -206,11 +208,11 @@ void newblast(struct state*);
 struct blast *deleteblast(struct state*,struct blast*,struct blast*);
 void newenemy(struct state*,int);
 struct enemy *deleteenemy(struct state*,struct enemy*,struct enemy*);
-void newparticle(struct state *state,float,float,int);
+void newparticle(struct state *state,float,float,int,int);
 struct particle *deleteparticle(struct state*,struct particle*,struct particle*);
 void newshockwave(struct state*,float,float,int);
 struct shockwave *deleteshockwave(struct state*,struct shockwave*,struct shockwave*);
-void newsmoke(struct state*,struct base*);
+void newsmoke(struct state*,struct base*,int);
 struct smoke *deletesmoke(struct state*,struct smoke*,struct smoke*);
 void newflare(struct state *state,int);
 struct flare *deleteflare(struct state*,struct flare*,struct flare*);

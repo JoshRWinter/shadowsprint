@@ -81,9 +81,9 @@ struct blast *deleteblast(struct state *state,struct blast *blast,struct blast *
 	return temp;
 }
 
-void newparticle(struct state *state,float x,float y,int count){
+void newparticle(struct state *state,float x,float y,int count,int color){
 	const float PARTICLE_SPEED=3.8f;
-	newshockwave(state,x,y,true);
+	newshockwave(state,x,y,color);
 	for(int i=0;i<count;++i){
 		float angle=torad(randomint(1,360));
 		struct particle *particle=malloc(sizeof(struct particle));
@@ -95,6 +95,7 @@ void newparticle(struct state *state,float x,float y,int count){
 		particle->base.count=1.0f;
 		particle->xv=cosf(angle)/PARTICLE_SPEED;
 		particle->yv=sinf(angle)/PARTICLE_SPEED;
+		particle->color=color;
 		particle->ttl=randomint(120,145);
 		particle->next=state->particlelist;
 		state->particlelist=particle;
@@ -108,7 +109,7 @@ struct particle *deleteparticle(struct state *state,struct particle *particle,st
 	return temp;
 }
 
-void newshockwave(struct state *state,float x,float y,int black){
+void newshockwave(struct state *state,float x,float y,int color){
 	struct shockwave *shockwave=malloc(sizeof(struct shockwave));
 	shockwave->base.w=0.0f;
 	shockwave->base.h=0.0f;
@@ -116,7 +117,7 @@ void newshockwave(struct state *state,float x,float y,int black){
 	shockwave->base.y=y;
 	shockwave->base.rot=0.0f;
 	shockwave->base.count=1.0f;
-	shockwave->black=black;
+	shockwave->color=color;
 	shockwave->alpha=1.0f;
 	shockwave->next=state->shockwavelist;
 	state->shockwavelist=shockwave;
@@ -129,7 +130,7 @@ struct shockwave *deleteshockwave(struct state *state,struct shockwave *shockwav
 	return temp;
 }
 
-void newsmoke(struct state *state,struct base *base){
+void newsmoke(struct state *state,struct base *base,int color){
 	if(!onein(5))return;
 	struct smoke *smoke=malloc(sizeof(struct smoke));
 	smoke->base.w=SMOKE_SIZE;
@@ -138,10 +139,7 @@ void newsmoke(struct state *state,struct base *base){
 	smoke->base.y=base->y+(base->h/2.0f)+(randomint(-4,4)/50.0f);
 	smoke->base.rot=0.0f;
 	smoke->base.count=1.0f;
-	if(base->count==2.0f){ // flare
-		smoke->black=false;
-	}
-	else smoke->black=true;
+	smoke->color=color;
 	smoke->alpha=randomint(60,80)/100.0f;
 	smoke->next=state->smokelist;
 	state->smokelist=smoke;

@@ -90,7 +90,7 @@ int core(struct state *state){
 		}
 		side=correct(&state->player.base,&enemy->base);
 		if(side==COLLIDE_TOP){
-			newparticle(state,enemy->base.x+(ENEMY_WIDTH/2.0f),enemy->base.y+(ENEMY_HEIGHT/2.0f),20);
+			newparticle(state,enemy->base.x+(ENEMY_WIDTH/2.0f),enemy->base.y+(ENEMY_HEIGHT/2.0f),20,COLOR_BLACK);
 			enemy=deleteenemy(state,enemy,prevenemy);
 			continue;
 		}
@@ -98,7 +98,7 @@ int core(struct state *state){
 		}
 		for(struct blast *blast=state->blastlist,*prevblast=NULL;blast!=NULL;){
 			if(collide(&blast->base,&enemy->base)){
-				newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),20);
+				newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),20,COLOR_BLACK);
 				blast=deleteblast(state,blast,prevblast);
 				enemy=deleteenemy(state,enemy,prevenemy);
 				stop=true;
@@ -139,13 +139,13 @@ int core(struct state *state){
 	
 	for(struct blast *blast=state->blastlist,*prevblast=NULL;blast!=NULL;){
 		blast->base.x+=blast->xv;
-		newsmoke(state,&blast->base);
+		newsmoke(state,&blast->base,COLOR_BLACK);
 		if(blast->frametimer++>4){
 			blast->frametimer=0;
 			if(++blast->frame>3)blast->frame=0;
 		}
 		if(!blast->ttl--){
-			newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),20);
+			newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),20,COLOR_BLACK);
 			blast=deleteblast(state,blast,prevblast);
 			continue;
 		}
@@ -153,7 +153,7 @@ int core(struct state *state){
 		for(int i=0;i<BLOCK_COUNT;++i){
 			if(state->block[i].hidden)continue;
 			if(collide(&state->block[i].base,&blast->base)){
-				newparticle(state,blast->xv>0.0f?blast->base.x+BLAST_WIDTH:blast->base.x,blast->base.y+(BLAST_HEIGHT/2.0f),20);
+				newparticle(state,blast->xv>0.0f?blast->base.x+BLAST_WIDTH:blast->base.x,blast->base.y+(BLAST_HEIGHT/2.0f),20,COLOR_BLACK);
 				blast=deleteblast(state,blast,prevblast);
 				stop=true;
 				break;
@@ -163,11 +163,11 @@ int core(struct state *state){
 		for(struct silo *silo=state->silolist,*prevsilo=NULL;silo!=NULL;){
 			if(collide(&blast->base,&silo->base)){
 				if((silo->health-=randomint(40,60))<1){
-					newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),30);
+					newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),30,COLOR_BLACK);
 					silo=deletesilo(state,silo,prevsilo);
 				}
 				else{
-					newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),10);
+					newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),10,COLOR_BLACK);
 				}
 				blast=deleteblast(state,blast,prevblast);
 				stop=true;
@@ -260,13 +260,13 @@ int core(struct state *state){
 		if(++flare->frame>60)flare->frame=0;
 		int side;
 		int stop=false;
-		if(onein(4))newsmoke(state,&flare->base);
+		if(onein(4))newsmoke(state,&flare->base,COLOR_RED);
 		for(int i=0;i<BLOCK_COUNT;++i){
 			if(state->block[i].hidden)continue;
 			if(side=correct(&flare->base,&state->block[i].base)){
 				switch(side){
 					case COLLIDE_TOP:
-						newshockwave(state,flare->base.x+(FLARE_SIZE/2.0f),state->block[i].base.y,false);
+						newparticle(state,flare->base.x+(FLARE_SIZE/2.0f),state->block[i].base.y,30,COLOR_RED);
 						flare=deleteflare(state,flare,prevflare);
 						stop=true;
 						break;
@@ -301,7 +301,7 @@ int core(struct state *state){
 		struct base temp=missile->base;
 		temp.x-=missile->xv*5.0f;
 		temp.w=MISSILE_WIDTH/8.0f;
-		if(!onein(7))newsmoke(state,&missile->base);
+		if(!onein(7))newsmoke(state,&missile->base,COLOR_BLACK);
 		--missile->ttl;
 		missile->base.x+=missile->xv;
 		missile->base.y+=missile->yv;
@@ -309,13 +309,13 @@ int core(struct state *state){
 		int stop=false;
 		if(missile->ttl<MISSILE_TTL-60&&missile->ttl>0){
 			if(collide(&missile->base,&state->player.base)){
-				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),30);
+				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),30,COLOR_BLACK);
 				missile=deletemissile(state,missile,prevmissile);
 				continue;
 			}
 			for(int i=0;i<BLOCK_COUNT;++i){
 				if(collide(&state->block[i].base,&missile->base)&&!state->block[i].hidden){
-					newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30);
+					newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30,COLOR_BLACK);
 					missile=deletemissile(state,missile,prevmissile);
 					stop=true;
 					break;
@@ -332,7 +332,7 @@ int core(struct state *state){
 			missile->yv+=GRAVITY;
 			for(int i=0;i<BLOCK_COUNT;++i){
 				if(collide(&state->block[i].base,&missile->base)&&!state->block[i].hidden){
-					newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30);
+					newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30,COLOR_BLACK);
 					missile=deletemissile(state,missile,prevmissile);
 					stop=true;
 					break;
@@ -348,8 +348,8 @@ int core(struct state *state){
 				continue;
 			}
 			if(collide(&missile->base,&missile2->base)){
-				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),30);
-				newparticle(state,missile2->base.x+(MISSILE_WIDTH/2.0f),missile2->base.y+(MISSILE_HEIGHT/2.0f),30);
+				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),30,COLOR_BLACK);
+				newparticle(state,missile2->base.x+(MISSILE_WIDTH/2.0f),missile2->base.y+(MISSILE_HEIGHT/2.0f),30,COLOR_BLACK);
 				missile->dead=true;
 				missile2->dead=true;
 				stop=true;
@@ -440,6 +440,15 @@ void render(struct state *state){
 			draw(state,&cloud->base,0,cloud->xinvert);
 	}
 	
+	if(state->particlelist){
+		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
+		for(struct particle *particle=state->particlelist;particle!=NULL;particle=particle->next){
+			if(particle->color==COLOR_BLACK)glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
+			else glUniform4f(state->uniform.rgba,1.0f,0.416f,0.0f,1.0f);
+			draw(state,&particle->base,0,false);
+		}
+	}
+	
 	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
 	glUniform4f(state->uniform.rgba,1.0f,0.0f,0.0f,1.0f);
 	uidraw(state,&state->lava,0);
@@ -482,24 +491,20 @@ void render(struct state *state){
 	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_PLAYER].object);
 	draw(state,&state->player.base,state->player.frame,state->player.xinvert);
 	
-	if(state->particlelist){
-		glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
+	if(state->smokelist){
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
-		for(struct particle *particle=state->particlelist;particle!=NULL;particle=particle->next)
-			draw(state,&particle->base,0,false);
-	}
-	
-	for(struct smoke *smoke=state->smokelist;smoke!=NULL;smoke=smoke->next){
-		if(!state->particlelist)glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
-		if(smoke->black)glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,smoke->alpha);
-		else glUniform4f(state->uniform.rgba,1.0f,0.416f,0.0f,smoke->alpha);
-		draw(state,&smoke->base,0,false);
+		for(struct smoke *smoke=state->smokelist;smoke!=NULL;smoke=smoke->next){
+			if(!state->particlelist)glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
+			if(smoke->color==COLOR_BLACK)glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,smoke->alpha);
+			else glUniform4f(state->uniform.rgba,1.0f,0.416f,0.0f,smoke->alpha);
+			draw(state,&smoke->base,0,false);
+		}
 	}
 	
 	if(state->shockwavelist){
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_SHOCKWAVE].object);
 		for(struct shockwave *shockwave=state->shockwavelist;shockwave!=NULL;shockwave=shockwave->next){
-			if(shockwave->black)glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,shockwave->alpha);
+			if(shockwave->color==COLOR_BLACK)glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,shockwave->alpha);
 			else glUniform4f(state->uniform.rgba,1.0f,0.416f,0.0f,shockwave->alpha);
 			draw(state,&shockwave->base,0,false);
 		}
