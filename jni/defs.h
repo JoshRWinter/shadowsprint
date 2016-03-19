@@ -204,6 +204,7 @@ void draw(struct state*,struct base*,float,int);
 int collide(struct base*,struct base*);
 int correct(struct base*,struct base*);
 int menu_main(struct state*);
+int menu_pause(struct state*);
 int menu_conf(struct state*);
 int menu_message(struct state*,const char*,const char*,int*);
 void saveconf(struct state*);

@@ -50,7 +50,47 @@ int menu_main(struct state *state){
 }
 
 int menu_pause(struct state *state){
-	return true;
+	struct button backbutton={{5.8f,-BUTTON_HEIGHT/2.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Resume",false};
+	struct button resetbutton={{-5.0f,-1.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Reset",false};
+	struct button tutorialbutton={{-3.0f,-1.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Tut.",false};
+	struct button mainmenubutton={{-1.0f,-1.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Menu",false};
+	while(process(state->app)){
+		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
+		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BACKGROUND].object);
+		uidraw(state,&state->background,0.0f);
+		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTONFRAME].object);
+		uidraw(state,&state->buttonframe,0.0f);
+		
+		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
+		if(buttondraw(state,&resetbutton)==BUTTON_ACTIVATE){
+			reset(state);
+			return true;
+		}
+		if(buttondraw(state,&tutorialbutton)==BUTTON_ACTIVATE){
+			// tutorial
+		}
+		if(buttondraw(state,&mainmenubutton)==BUTTON_ACTIVATE){
+			state->showmenu=true;
+			return true;
+		}
+		if(buttondraw(state,&backbutton)==BUTTON_ACTIVATE||state->back){
+			state->back=false;
+			return true;
+		}
+		
+		glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
+		glBindTexture(GL_TEXTURE_2D,state->font.main->atlas);
+		buttondrawtext(state->font.main,&resetbutton);
+		buttondrawtext(state->font.main,&tutorialbutton);
+		buttondrawtext(state->font.main,&mainmenubutton);
+		buttondrawtext(state->font.main,&backbutton);
+		
+		glBindTexture(GL_TEXTURE_2D,state->font.header->atlas);
+		drawtextcentered(state->font.header,-2.0f,-3.0,"Paused");
+		
+		eglSwapBuffers(state->display,state->surface);
+	}
+	return false;
 }
 
 int menu_conf(struct state *state){

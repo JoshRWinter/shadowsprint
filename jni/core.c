@@ -421,9 +421,11 @@ int core(struct state *state){
 		newblast(state);
 	}
 	if((state->pbuttonstate=buttonprocess(state,&state->pbutton))==BUTTON_ACTIVATE){
-		reset(state);
-		state->showmenu=true;
-		return menu_main(state);
+		if(!menu_pause(state))return false;
+		if(state->showmenu){
+			reset(state);
+			return core(state);
+		}
 	}
 	return true;
 }
