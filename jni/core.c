@@ -562,6 +562,13 @@ void render(struct state *state){
 }
 
 void init(struct state *state){
+	if(!readconf(state)){
+		state->musicenabled=true;
+		state->soundenabled=true;
+		state->vibenabled=true;
+		state->showtut=true;
+	}
+	else state->showtut=false;
 	state->showmenu=true;
 	state->back=false;
 	memset(state->pointer,0,sizeof(struct crosshair)*2);

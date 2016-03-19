@@ -23,11 +23,14 @@
 #define TID_SILO 7
 #define TID_MISSILE 8
 
-//ui
+// ui
 #define TID_BACKGROUND 0
 #define TID_BUTTON 1
 #define TID_BUTTONFRAME 2
 #define TID_SYMBOL 3
+
+// sound
+#define SID_THEME 0
 
 struct base{
 	float x,y,w,h,rot,count;
@@ -154,11 +157,12 @@ struct button{
 };
 
 struct state{
-	int running,populate,showmenu,back,musicenabled,soundenabled,vibenabled;
+	int running,populate,showmenu,back,musicenabled,soundenabled,vibenabled,showtut;
 	unsigned vao,vbo,program;
 	struct pack assets,uiassets;
 	struct apack aassets;
 	struct android_app *app;
+	slesenv *soundengine;
 	EGLDisplay display;
 	EGLSurface surface;
 	EGLContext context;
@@ -200,7 +204,10 @@ void draw(struct state*,struct base*,float,int);
 int collide(struct base*,struct base*);
 int correct(struct base*,struct base*);
 int menu_main(struct state*);
+int menu_conf(struct state*);
 int menu_message(struct state*,const char*,const char*,int*);
+void saveconf(struct state*);
+int readconf(struct state*);
 const char *getenemyphrase();
 
 void newblocks(struct state*);

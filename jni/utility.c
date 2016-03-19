@@ -65,6 +65,27 @@ void buttondrawtext(ftfont* font,struct button *button){
 	drawtextcentered(font,button->base.x+(button->base.w/2.0f),button->base.y+(button->base.h/2.0f)-(font->fontsize/2.0f)+(button->active?0.0f:-0.1f),button->label);
 }
 
+void saveconf(struct state *state){
+	FILE *file=fopen(DATAPATH"d00","wb");
+	if(!file){
+		logcat("error: could not open "DATAPATH"d00 for writing.");
+		return;
+	}
+	fwrite(&state->musicenabled,sizeof(int),1,file);
+	fwrite(&state->soundenabled,sizeof(int),1,file);
+	fwrite(&state->vibenabled,sizeof(int),1,file);
+	fclose(file);
+}
+int readconf(struct state *state){
+	FILE *file=fopen(DATAPATH"d00","rb");
+	if(!file)return false;
+	fread(&state->musicenabled,sizeof(int),1,file);
+	fread(&state->soundenabled,sizeof(int),1,file);
+	fread(&state->vibenabled,sizeof(int),1,file);
+	fclose(file);
+	return true;
+}
+
 int pointing0(struct crosshair *pointer,struct base *base){
 	return pointer[0].active&&pointer[0].x>base->x&&pointer[0].x<base->x+base->w&&pointer[0].y>base->y&&pointer[0].y<base->y+base->h;
 }

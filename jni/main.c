@@ -51,6 +51,9 @@ void init_display(struct state *state){
 	state->font.main=create_ftfont(state->app->activity->assetManager,0.425f,"corbel.ttf");
 	state->font.dialog=create_ftfont(state->app->activity->assetManager,0.65f,"corbel.ttf");
 	state->font.header=create_ftfont(state->app->activity->assetManager,0.9f,"BAUHS93.TTF");
+	loadapack(&state->aassets,state->app->activity->assetManager,"aassets");
+	state->soundengine=initOpenSL();
+	if(state->musicenabled)playsound(state->soundengine,state->aassets.sound+SID_THEME,true);
 }
 void term_display(struct state *state){
 	state->running=false;
@@ -64,6 +67,8 @@ void term_display(struct state *state){
 	eglDestroySurface(state->display,state->surface);
 	eglDestroyContext(state->display,state->context);
 	eglTerminate(state->display);
+	termOpenSL(state->soundengine);
+	destroyapack(&state->aassets);
 }
 
 int32_t inputproc(struct android_app *app,AInputEvent *event){
