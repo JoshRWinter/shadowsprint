@@ -473,7 +473,11 @@ void render(struct state *state){
 	if(state->missilelist){
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_MISSILE].object);
 		for(struct missile *missile=state->missilelist;missile!=NULL;missile=missile->next)
-			draw(state,&missile->base,0.0f,false);
+			if(missile->base.y+MISSILE_HEIGHT>state->rect.top)draw(state,&missile->base,0.0f,false);
+			else{
+				struct base temp={missile->base.x,state->rect.top,MISSILE_WIDTH,MISSILE_HEIGHT,0.0f,2.0f};
+				draw(state,&temp,1.0f,false);
+			}
 	}
 	
 	if(state->silolist){

@@ -203,7 +203,7 @@ void newmissile(struct state *state,struct silo *silo){
 	missile->base.x=silo->base.x+(SILO_WIDTH/2.0f)-(MISSILE_WIDTH/2.0f);
 	missile->base.y=silo->base.y+SILO_HEIGHT;
 	missile->base.rot=PI/2.0f;
-	missile->base.count=1.0f;
+	missile->base.count=2.0f;
 	missile->xv=0.0f;
 	missile->yv=-0.05f;
 	missile->ttl=MISSILE_TTL;
