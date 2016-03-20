@@ -180,6 +180,13 @@ void newsilo(struct state *state,int index){
 	silo->base.h=SILO_HEIGHT;
 	silo->base.x=randomint(state->block[index].base.x*100.0f,(state->block[index].base.x+state->block[index].base.w-SILO_WIDTH)*100.0f)/100.0f;
 	silo->base.y=state->block[index].base.y-SILO_HEIGHT;
+	for(struct silo *silo2=state->silolist;silo2!=NULL;silo2=silo2->next){
+		if(collide(&silo->base,&silo2->base)){
+			free(silo);
+			newsilo(state,index);
+			return;
+		}
+	}
 	silo->base.rot=0.0f;
 	silo->base.count=1.0f;
 	silo->health=100;
@@ -224,26 +231,24 @@ struct missile *deletemissile(struct state *state,struct missile *missile,struct
 
 void newdust(struct state *state){
 	struct dust *dust=malloc(sizeof(struct dust));
-	dust->base.w=randomint(5,90)/100.0f;
+	dust->base.w=randomint(12,90)/100.0f;
 	dust->base.h=dust->base.w;
 	dust->base.x=randomint((state->player.base.x+state->rect.left)*10.0f,(state->player.base.x+state->rect.right+15.0f)*10.0f)/10.0f;
 	dust->base.y=state->rect.top-dust->base.h;
 	dust->base.rot=torad(randomint(1,360));
 	dust->base.count=5.0f;
-	dust->xv-=0.1f*dust->base.w;
+	dust->xv=-0.1f*dust->base.w;
 	dust->yv=-dust->xv;
 	dust->rotv=randomint(-30,30)/1000.0f;
 	dust->sprite=randomint(0,4);
 	dust->xflip=onein(2);
 	dust->next=state->dustlist;
 	state->dustlist=dust;
-	if(state->dustlist->next==NULL){
-		for(int i=0;i<400;++i)dustroutine(state);
-	}
 }
-void dustroutine(struct state *state){
-	if(onein(4)||onein(5)||!state->dustlist)newdust(state);
+static void dustprocess(struct state *state){
+	if(onein(6)||!state->dustlist)newdust(state);
 	for(struct dust *dust=state->dustlist,*prevdust=NULL;dust!=NULL;){
+		if(dust->xv>1.0f)logcat("ERROR");
 		dust->base.x+=dust->xv;
 		dust->base.y+=dust->yv;
 		dust->base.rot+=dust->rotv;
@@ -254,6 +259,14 @@ void dustroutine(struct state *state){
 		prevdust=dust;
 		dust=dust->next;
 	}
+}
+void dustroutine(struct state *state){
+	if(state->dustlist==NULL){
+		for(int i=0;i<200;++i){
+			dustprocess(state);
+		}
+	}
+	else dustprocess(state);
 }
 void dustrender(struct state *state){
 	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_DUST].object);

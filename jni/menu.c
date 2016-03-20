@@ -53,9 +53,10 @@ int menu_main(struct state *state){
 
 int menu_pause(struct state *state){
 	struct button backbutton={{5.8f,-BUTTON_HEIGHT/2.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Resume",false};
-	struct button resetbutton={{-5.0f,-1.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Reset",false};
-	struct button tutorialbutton={{-3.0f,-1.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Tut.",false};
-	struct button mainmenubutton={{-1.0f,-1.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Menu",false};
+	struct button resetbutton={{-6.0f,-1.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Reset",false};
+	struct button tutorialbutton={{-4.0f,-1.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Tut.",false};
+	struct button mainmenubutton={{0.0f,-1.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Menu",false};
+	struct button confmenubutton={{-2.0f,-1.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Settings",false};
 	while(process(state->app)){
 		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BACKGROUND].object);
@@ -77,6 +78,9 @@ int menu_pause(struct state *state){
 			state->showmenu=true;
 			return true;
 		}
+		if(buttondraw(state,&confmenubutton)==BUTTON_ACTIVATE){
+			if(!menu_conf(state))return false;
+		}
 		if(buttondraw(state,&backbutton)==BUTTON_ACTIVATE||state->back){
 			state->back=false;
 			return true;
@@ -87,6 +91,7 @@ int menu_pause(struct state *state){
 		buttondrawtext(state->font.main,&resetbutton);
 		buttondrawtext(state->font.main,&tutorialbutton);
 		buttondrawtext(state->font.main,&mainmenubutton);
+		buttondrawtext(state->font.main,&confmenubutton);
 		buttondrawtext(state->font.main,&backbutton);
 		
 		glBindTexture(GL_TEXTURE_2D,state->font.header->atlas);

@@ -8,11 +8,6 @@ int core(struct state *state){
 	if(state->showmenu){
 		if(!menu_main(state))return false;
 	}
-	if(state->back){
-		state->back=false;
-		state->showmenu=true;
-		return core(state);
-	}
 	
 	if(state->player.reload)--state->player.reload;
 	state->player.yv+=GRAVITY;
@@ -421,7 +416,8 @@ int core(struct state *state){
 	if((state->fbuttonstate=pointing(state->pointer,&state->fbutton))&&!state->player.reload){
 		newblast(state);
 	}
-	if((state->pbuttonstate=buttonprocess(state,&state->pbutton))==BUTTON_ACTIVATE){
+	if((state->pbuttonstate=buttonprocess(state,&state->pbutton))==BUTTON_ACTIVATE||state->back){
+		state->back=false;
 		if(!menu_pause(state))return false;
 		if(state->showmenu){
 			reset(state);
