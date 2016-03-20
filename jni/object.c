@@ -62,7 +62,7 @@ void newblast(struct state *state){
 	struct blast *blast=malloc(sizeof(struct blast));
 	blast->base.w=BLAST_WIDTH;
 	blast->base.h=BLAST_HEIGHT;
-	blast->base.x=state->player.xinvert?state->player.base.x-BLAST_WIDTH:state->player.base.x+PLAYER_WIDTH;
+	blast->base.x=state->player.base.x+(PLAYER_WIDTH/2.0f)-(BLAST_WIDTH/2.0f);
 	blast->base.y=state->player.base.y+(PLAYER_HEIGHT/2.0f)-(BLAST_HEIGHT/2.0f);
 	blast->base.rot=0.0f;
 	blast->base.count=4.0f;
@@ -178,7 +178,7 @@ void newsilo(struct state *state,int index){
 	struct silo *silo=malloc(sizeof(struct silo));
 	silo->base.w=SILO_WIDTH;
 	silo->base.h=SILO_HEIGHT;
-	silo->base.x=randomint(state->block[index].base.x*10.0f,(state->block[index].base.x+state->block[index].base.w-SILO_WIDTH)*10.0f)/10.0f;
+	silo->base.x=randomint(state->block[index].base.x*100.0f,(state->block[index].base.x+state->block[index].base.w-SILO_WIDTH)*100.0f)/100.0f;
 	silo->base.y=state->block[index].base.y-SILO_HEIGHT;
 	silo->base.rot=0.0f;
 	silo->base.count=1.0f;

@@ -301,7 +301,7 @@ int core(struct state *state){
 		struct base temp=missile->base;
 		temp.x-=missile->xv*5.0f;
 		temp.w=MISSILE_WIDTH/8.0f;
-		if(!onein(7))newsmoke(state,&missile->base,COLOR_BLACK);
+		if(!onein(7)&&missile->ttl>0)newsmoke(state,&missile->base,COLOR_BLACK);
 		--missile->ttl;
 		missile->base.x+=missile->xv;
 		missile->base.y+=missile->yv;
@@ -329,7 +329,7 @@ int core(struct state *state){
 			missile->yv=-sinf(missile->base.rot)*MISSILE_SPEED;
 		}
 		else if(missile->ttl<1){
-			missile->yv+=GRAVITY;
+			missile->yv+=GRAVITY/2.7f;
 			for(int i=0;i<BLOCK_COUNT;++i){
 				if(collide(&state->block[i].base,&missile->base)&&!state->block[i].hidden){
 					newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30,COLOR_BLACK);
@@ -520,7 +520,7 @@ void render(struct state *state){
 	if(state->blastlist){
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLAST].object);
 		for(struct blast *blast=state->blastlist;blast!=NULL;blast=blast->next)
-			draw(state,&blast->base,blast->frame,blast->xv>0.0f?false:true);
+			if(blast->ttl<68)draw(state,&blast->base,blast->frame,blast->xv>0.0f?false:true);
 	}
 	
 	glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
