@@ -398,6 +398,7 @@ int core(struct state *state){
 			}
 		}while(silocount<SILO_COUNT||enemycount<ENEMY_COUNT);
 	}
+	dustroutine(state);
 	
 	// buttons
 	state->lbuttonstate=pointing(state->pointer,&state->lbutton);
@@ -523,6 +524,8 @@ void render(struct state *state){
 			if(blast->ttl<68)draw(state,&blast->base,blast->frame,blast->xv>0.0f?false:true);
 	}
 	
+	dustrender(state);
+	
 	glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 	uidraw(state,&state->lbutton,state->lbuttonstate);
 	uidraw(state,&state->rbutton,state->rbuttonstate);
@@ -596,6 +599,7 @@ void init(struct state *state){
 	state->silolist=NULL;
 	state->missilelist=NULL;
 	state->cloudlist=NULL;
+	state->dustlist=NULL;
 }
 void reset(struct state *state){
 	for(struct enemy *enemy=state->enemylist;enemy!=NULL;enemy=deleteenemy(state,enemy,NULL));
@@ -607,6 +611,7 @@ void reset(struct state *state){
 	for(struct silo *silo=state->silolist;silo!=NULL;silo=deletesilo(state,silo,NULL));
 	for(struct missile *missile=state->missilelist;missile!=NULL;missile=deletemissile(state,missile,NULL));
 	for(struct cloud *cloud=state->cloudlist;cloud!=NULL;cloud=deletecloud(state,cloud,NULL));
+	for(struct dust *dust=state->dustlist;dust!=NULL;dust=deletedust(state,dust,NULL));
 	newblocks(state);
 	state->populate=true;
 	state->player.base.x=0.0f;

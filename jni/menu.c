@@ -20,6 +20,8 @@ int menu_main(struct state *state){
 		uidraw(state,&state->background,0);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTONFRAME].object);
 		uidraw(state,&state->buttonframe,0);
+		dustroutine(state);
+		dustrender(state);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(buttondraw(state,&playbutton)==BUTTON_ACTIVATE){
 			return true;
@@ -60,6 +62,8 @@ int menu_pause(struct state *state){
 		uidraw(state,&state->background,0.0f);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTONFRAME].object);
 		uidraw(state,&state->buttonframe,0.0f);
+		dustroutine(state);
+		dustrender(state);
 		
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(buttondraw(state,&resetbutton)==BUTTON_ACTIVATE){
@@ -107,6 +111,8 @@ int menu_conf(struct state *state){
 		uidraw(state,&state->background,0.0f);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTONFRAME].object);
 		uidraw(state,&state->buttonframe,0.0f);
+		dustroutine(state);
+		dustrender(state);
 		
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(buttondraw(state,&musicbutton)==BUTTON_ACTIVATE){
@@ -168,6 +174,8 @@ int menu_message(struct state *state,const char *caption,const char *msg,int *ye
 		uidraw(state,&state->background,0);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTONFRAME].object);
 		uidraw(state,&state->buttonframe,0);
+		dustroutine(state);
+		dustrender(state);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(yesno){
 			if(buttondraw(state,&yesbutton)==BUTTON_ACTIVATE){

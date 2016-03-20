@@ -2,7 +2,7 @@
 #define DATAPATH "/data/data/joshwinter.shadow/files/"
 #define PI 3.14159f
 #define PI2 (2.0f*PI)
-#define TEX_MODE "110110111"
+#define TEX_MODE "1101101111"
 #define COLLIDE_RIGHT 1
 #define COLLIDE_TOP 2
 #define COLLIDE_LEFT 3
@@ -22,6 +22,7 @@
 #define TID_FLARE  6
 #define TID_SILO 7
 #define TID_MISSILE 8
+#define TID_DUST 9
 
 // ui
 #define TID_BACKGROUND 0
@@ -146,6 +147,13 @@ struct cloud{
 	struct cloud *next;
 };
 
+struct dust{
+	struct base base;
+	int sprite,xflip;
+	float xv,yv,rotv;
+	struct dust *next;
+};
+
 #define BUTTON_WIDTH 1.9f
 #define BUTTON_HEIGHT 2.0666f
 #define BUTTON_PRESS 1
@@ -187,6 +195,7 @@ struct state{
 	struct silo *silolist;
 	struct missile *missilelist;
 	struct cloud *cloudlist;
+	struct dust *dustlist;
 };
 
 int process(struct android_app*);
@@ -211,6 +220,10 @@ void saveconf(struct state*);
 int readconf(struct state*);
 const char *getenemyphrase();
 
+void newdust(struct state*);
+void dustroutine(struct state*);
+void dustrender(struct state*);
+struct dust *deletedust(struct state*,struct dust*,struct dust*);
 void newblocks(struct state*);
 void newblast(struct state*);
 struct blast *deleteblast(struct state*,struct blast*,struct blast*);

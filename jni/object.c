@@ -222,6 +222,53 @@ struct missile *deletemissile(struct state *state,struct missile *missile,struct
 	return temp;
 }
 
+void newdust(struct state *state){
+	struct dust *dust=malloc(sizeof(struct dust));
+	dust->base.w=randomint(5,90)/100.0f;
+	dust->base.h=dust->base.w;
+	dust->base.x=randomint((state->player.base.x+state->rect.left)*10.0f,(state->player.base.x+state->rect.right+15.0f)*10.0f)/10.0f;
+	dust->base.y=state->rect.top-dust->base.h;
+	dust->base.rot=torad(randomint(1,360));
+	dust->base.count=5.0f;
+	dust->xv-=0.1f*dust->base.w;
+	dust->yv=-dust->xv;
+	dust->rotv=randomint(-30,30)/1000.0f;
+	dust->sprite=randomint(0,4);
+	dust->xflip=onein(2);
+	dust->next=state->dustlist;
+	state->dustlist=dust;
+	if(state->dustlist->next==NULL){
+		for(int i=0;i<400;++i)dustroutine(state);
+	}
+}
+void dustroutine(struct state *state){
+	if(onein(4)||onein(5)||!state->dustlist)newdust(state);
+	for(struct dust *dust=state->dustlist,*prevdust=NULL;dust!=NULL;){
+		dust->base.x+=dust->xv;
+		dust->base.y+=dust->yv;
+		dust->base.rot+=dust->rotv;
+		if(dust->base.x+dust->base.w<state->rect.left||dust->base.y>state->rect.bottom){
+			dust=deletedust(state,dust,prevdust);
+			continue;
+		}
+		prevdust=dust;
+		dust=dust->next;
+	}
+}
+void dustrender(struct state *state){
+	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_DUST].object);
+	for(struct dust *dust=state->dustlist;dust!=NULL;dust=dust->next){
+		draw(state,&dust->base,dust->sprite,dust->xflip);
+	}
+}
+struct dust *deletedust(struct state *state,struct dust *dust,struct dust *prev){
+	if(prev!=NULL)prev->next=dust->next;
+	else state->dustlist=dust->next;
+	void *temp=dust->next;
+	free(dust);
+	return temp;
+}
+
 void newcloud(struct state *state){
 	struct cloud *cloud=malloc(sizeof(struct cloud));
 	cloud->base.w=CLOUD_WIDTH;
