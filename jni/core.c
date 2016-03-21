@@ -10,7 +10,8 @@ int core(struct state *state){
 	}
 	
 	if(state->player.reload)--state->player.reload;
-	state->player.yv+=GRAVITY;
+	if(state->player.success)state->player.yv-=GRAVITY;
+	else state->player.yv+=GRAVITY;
 	if(state->player.xv>0.0f)state->player.xinvert=false;
 	else if(state->player.xv<0.0f)state->player.xinvert=true;
 	state->player.base.y+=state->player.yv;
@@ -239,7 +240,7 @@ int core(struct state *state){
 	}
 	
 	for(struct flare *flare=state->flarelist,*prevflare=NULL;flare!=NULL;){
-		if(flare->xv>0.0f&&flare->base.y>state->rect.bottom){
+		if(flare->yv>0.0f&&flare->base.y>state->rect.bottom+2.0f){
 			flare=deleteflare(state,flare,prevflare);
 			continue;
 		}
@@ -252,7 +253,7 @@ int core(struct state *state){
 		flare->base.rot+=flare->xv*1.5f;
 		if(flare->base.rot>PI2)flare->base.rot=0.0f;
 		else if(flare->base.rot<0.0f)flare->base.rot=PI2;
-		if(++flare->frame>60)flare->frame=0;
+		if(++flare->frame>40)flare->frame=0;
 		int side;
 		int stop=false;
 		if(onein(4))newsmoke(state,&flare->base,COLOR_RED);
@@ -278,6 +279,11 @@ int core(struct state *state){
 			}
 		}
 		if(stop)continue;
+		if(collide(&state->player.base,&flare->base)){
+			newparticle(state,flare->base.x+(FLARE_SIZE/2.0f),flare->base.y+(FLARE_SIZE/2.0f),30,COLOR_RED);
+			flare=deleteflare(state,flare,prevflare);
+			continue;
+		}
 		prevflare=flare;
 		flare=flare->next;
 	}
@@ -373,15 +379,37 @@ int core(struct state *state){
 	if(onein(200)&&cloudcount<4)newcloud(state);
 	
 	for(int i=0;i<BLOCK_COUNT;++i){
-		if(state->block[i].hidden&&onein(200))newflare(state,i);
+		if(state->block[i].hidden&&onein(200)){
+			int occupied=false;
+			for(struct flare *flare=state->flarelist;flare!=NULL;flare=flare->next){
+				if(flare->blockparent==i){
+					occupied=true;
+					break;
+				}
+			}
+			if(!occupied)newflare(state,i);
+		}
+	}
+	
+	if(state->teleporter.frame++>60)state->teleporter.frame=0;
+	if(collide(&state->player.base,&state->teleporter.base)){
+		state->player.yv=-0.01f;
+		state->player.success=true;
 	}
 	
 	if(state->populate){
 		state->populate=false;
+		state->teleporter.base.x=state->block[BLOCK_COUNT-2].base.x+0.25f;
+		state->teleporter.base.y=state->block[BLOCK_COUNT-2].base.y-TELEPORTER_HEIGHT;
+		state->teleporter.base.rot=0.0f;
+		state->teleporter.base.w=TELEPORTER_WIDTH;
+		state->teleporter.base.h=TELEPORTER_HEIGHT;
+		state->teleporter.base.count=3.0f;
+		state->teleporter.frame=0;
 		int enemycount=0;
 		int silocount=0;
 		do{
-			for(int i=5;i<BLOCK_COUNT-1;++i){
+			for(int i=5;i<BLOCK_COUNT-2;++i){
 				if(onein(4)&&!state->block[i].hidden&&enemycount<ENEMY_COUNT){
 					newenemy(state,i);
 					++enemycount;
@@ -466,7 +494,7 @@ void render(struct state *state){
 	if(state->flarelist){
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_FLARE].object);
 		for(struct flare *flare=state->flarelist;flare!=NULL;flare=flare->next)
-			draw(state,&flare->base,flare->frame>30,false);
+			draw(state,&flare->base,flare->frame>20,false);
 	}
 	
 	if(state->missilelist){
@@ -519,6 +547,9 @@ void render(struct state *state){
 		for(struct blast *blast=state->blastlist;blast!=NULL;blast=blast->next)
 			if(blast->ttl<68)draw(state,&blast->base,blast->frame,blast->xv>0.0f?false:true);
 	}
+	
+	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_TELEPORTER].object);
+	draw(state,&state->teleporter.base,(int)(state->teleporter.frame/21),false);
 	
 	dustrender(state);
 	
@@ -621,5 +652,6 @@ void reset(struct state *state){
 	state->player.lives=3;
 	state->player.canjump=true;
 	state->player.reload=0;
+	state->player.success=false;
 	state->player.text.timer=0;
 }

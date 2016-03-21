@@ -11,7 +11,7 @@ void newblocks(struct state *state){
 	const float BLOCK_FLOOR=2.0f;
 	const float BLOCK_SPACING=0.45f;
 	for(int i=0;i<BLOCK_COUNT;++i){
-		state->block[i].hidden=(lasthidden?false:onein(3))||i==0||i==BLOCK_COUNT-1;
+		state->block[i].hidden=((lasthidden?false:onein(3))||i==0||i==BLOCK_COUNT-1)&&i!=BLOCK_COUNT-2;
 		if(state->block[i].hidden){
 			state->block[i].base.h=state->rect.bottom*2.0f;
 			state->block[i].base.w=1.45f;
@@ -23,7 +23,8 @@ void newblocks(struct state *state){
 					state->block[i].base.h=lasth+(randomint(-100,100)/100.0f);
 				}while((state->block[i].base.h>BLOCK_CEILING||state->block[i].base.h<BLOCK_FLOOR)||fabs(state->block[i].base.h-lasth)<BLOCK_SPACING);
 			}
-			state->block[i].base.w=randomint(275,450)/100.0f;
+			if(i==BLOCK_COUNT-2)state->block[i].base.w=2.5f;
+			else state->block[i].base.w=randomint(275,450)/100.0f;
 		}
 		state->block[i].base.x=offset-0.05f;
 		state->block[i].base.y=state->rect.bottom-state->block[i].base.h;
@@ -163,6 +164,7 @@ void newflare(struct state *state,int index){
 	flare->xv=randomint(-3,3)/100.0f;
 	flare->yv=-0.225f;
 	flare->frame=0;
+	flare->blockparent=index;
 	flare->next=state->flarelist;
 	state->flarelist=flare;
 }

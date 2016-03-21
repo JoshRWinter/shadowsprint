@@ -6,7 +6,8 @@
 int menu_main(struct state *state){
 	//vibratedevice(&state->jni_info,30);
 	const char *aboottext=
-	"Shadow Sprint\nProgrammed by Josh Winter\n\nFonts:\nCorbel\nBAUHAUS93";
+	"-- Shadow Sprint --\nProgrammed by Josh Winter\n-- Fonts --\nCorbel, BAUHAUS93\n-- Music --\nCoffee-Break - Legionella\n"
+	"Coffee-Break.newgrounds.com";
 	const float bleftoffset=5.8f;
 	const float btopoffset=-4.175f;
 	struct button playbutton={{bleftoffset,btopoffset,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Play",false};

@@ -2,7 +2,7 @@
 #define DATAPATH "/data/data/joshwinter.shadow/files/"
 #define PI 3.14159f
 #define PI2 (2.0f*PI)
-#define TEX_MODE "1101101111"
+#define TEX_MODE "11011011111"
 #define COLLIDE_RIGHT 1
 #define COLLIDE_TOP 2
 #define COLLIDE_LEFT 3
@@ -23,6 +23,7 @@
 #define TID_SILO 7
 #define TID_MISSILE 8
 #define TID_DUST 9
+#define TID_TELEPORTER 10
 
 // ui
 #define TID_BACKGROUND 0
@@ -47,8 +48,15 @@ struct base{
 struct player{
 	struct base base;
 	float xv,yv;
-	int lives,canjump,frame,frametimer,xinvert,reload;
+	int lives,canjump,frame,frametimer,xinvert,reload,success;
 	struct{char *phrase;int timer;}text;
+};
+
+#define TELEPORTER_WIDTH 2.0f
+#define TELEPORTER_HEIGHT 3.5f
+struct teleporter{
+	struct base base;
+	int frame;
 };
 
 #define ENEMY_WIDTH 1.0f
@@ -109,7 +117,7 @@ struct smoke{
 struct flare{
 	struct base base;
 	float xv,yv;
-	int frame;
+	int frame,blockparent;
 	struct flare *next;
 };
 
@@ -181,6 +189,7 @@ struct state{
 	struct device device;
 	struct jni_info jni_info;
 	struct base background,lava,buttonframe;
+	struct teleporter teleporter;
 	struct block block[BLOCK_COUNT];
 	struct base lbutton,rbutton,jbutton,fbutton;
 	struct button pbutton;
