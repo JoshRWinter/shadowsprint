@@ -10,13 +10,13 @@ int core(struct state *state){
 	}
 	
 	if(state->player.reload)--state->player.reload;
-	if(state->player.success)state->player.yv-=GRAVITY;
+	if(state->player.success)state->player.yv*=1.1f;
 	else state->player.yv+=GRAVITY;
 	if(state->player.xv>0.0f)state->player.xinvert=false;
 	else if(state->player.xv<0.0f)state->player.xinvert=true;
 	state->player.base.y+=state->player.yv;
 	state->player.base.x+=state->player.xv;
-	for(int i=0;i<BLOCK_COUNT;++i){
+	for(int i=0;i<BLOCK_COUNT&&!state->player.success;++i){
 		if(state->block[i].hidden)continue;
 		int side;
 		if(side=correct(&state->player.base,&state->block[i].base)){
@@ -392,8 +392,8 @@ int core(struct state *state){
 	}
 	
 	if(state->teleporter.frame++>60)state->teleporter.frame=0;
-	if(collide(&state->player.base,&state->teleporter.base)){
-		state->player.yv=-0.01f;
+	if(collide(&state->player.base,&state->teleporter.base)&&!state->player.success){
+		state->player.yv=0.0001f;
 		state->player.success=true;
 	}
 	
@@ -476,20 +476,6 @@ void render(struct state *state){
 		}
 	}
 	
-	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
-	glUniform4f(state->uniform.rgba,1.0f,0.0f,0.0f,1.0f);
-	uidraw(state,&state->lava,0);
-	
-	glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
-	for(int i=0;i<BLOCK_COUNT;++i){
-		if(!state->block[i].hidden)draw(state,&state->block[i].base,0,false);
-		/*else{
-			glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,0.3f);
-			draw(state,&state->block[i].base,0);
-			glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
-		}*/
-	}
-	
 	glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 	if(state->flarelist){
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_FLARE].object);
@@ -521,6 +507,20 @@ void render(struct state *state){
 	
 	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_PLAYER].object);
 	draw(state,&state->player.base,state->player.frame,state->player.xinvert);
+	
+	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
+	glUniform4f(state->uniform.rgba,1.0f,0.0f,0.0f,1.0f);
+	uidraw(state,&state->lava,0);
+	
+	glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
+	for(int i=0;i<BLOCK_COUNT;++i){
+		if(!state->block[i].hidden)draw(state,&state->block[i].base,0,false);
+		/*else{
+			glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,0.3f);
+			draw(state,&state->block[i].base,0);
+			glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
+		}*/
+	}
 	
 	if(state->smokelist){
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
@@ -590,6 +590,9 @@ void render(struct state *state){
 		++fps;
 		glBindTexture(GL_TEXTURE_2D,state->font.main->atlas);
 		drawtext(state->font.main,state->rect.left+3.0f,state->rect.top+0.1f,fpsstring);
+		char schtuff[30];
+		sprintf(schtuff,"yv: %f",state->player.yv);
+		drawtextcentered(state->font.main,0.0f,state->rect.top+0.1f,schtuff);
 	}
 }
 
