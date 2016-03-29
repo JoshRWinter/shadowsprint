@@ -16,6 +16,37 @@ const char *getenemyphrase(){
 	return enemyphrase[randomint(0,5)];
 }
 
+static const char *playerblastphrase[]={
+	"Gotcha!",
+	"Bull's eye!",
+	"Headshot.",
+	"Noice",
+	"Good night."
+};
+const char *getplayerblastphrase(){
+	return playerblastphrase[randomint(0,4)];
+}
+
+static const char *playerstompphrase[]={
+	"Pow!",
+	"Crunch.",
+	"Take that!"
+};
+const char *getplayerstompphrase(){
+	return playerstompphrase[randomint(0,2)];
+}
+
+static const char *playerresphrase[]={
+	"Death cannot stop me!",
+	"I WILL HAVE MY REVENGE",
+	"I LIVE AGAIN",
+	"I'm back, baby.",
+	"ARRRGGGHHH"
+};
+const char *getplayerresphrase(){
+	return playerresphrase[randomint(0,4)];
+}
+
 int buttonprocess0(struct state *state,struct button *button){
 	if(state->pointer[0].x>button->base.x&&state->pointer[0].x<button->base.x+button->base.w&&
 	state->pointer[0].y>button->base.y&&state->pointer[0].y<button->base.y+button->base.h){

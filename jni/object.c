@@ -250,7 +250,6 @@ void newdust(struct state *state){
 static void dustprocess(struct state *state){
 	if(onein(6)||!state->dustlist)newdust(state);
 	for(struct dust *dust=state->dustlist,*prevdust=NULL;dust!=NULL;){
-		if(dust->xv>1.0f)logcat("ERROR");
 		dust->base.x+=dust->xv;
 		dust->base.y+=dust->yv;
 		dust->base.rot+=dust->rotv;

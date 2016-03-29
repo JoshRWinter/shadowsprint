@@ -9,8 +9,20 @@ int core(struct state *state){
 		if(!menu_main(state))return false;
 	}
 	
+	if(state->player.text.timer)--state->player.text.timer;
 	if(state->player.reload)--state->player.reload;
-	if(state->player.success)state->player.yv*=1.1f;
+	if(state->player.success){
+		state->player.text.timer=0;
+		if(zerof(&state->player.base.w,state->ensmallen)!=0.0f&&zerof(&state->player.base.h,state->ensmallen*1.2f)!=0.0){
+			state->player.base.x+=state->ensmallen/2.0f;
+			state->player.base.y+=state->ensmallen/2.0f;
+			targetf(&state->player.base.x,0.1f,state->teleporter.base.x+(TELEPORTER_WIDTH/2.0f)-(state->player.base.w/2.0f));
+		}
+		if(state->ensmallen>150.0f){
+			reset_level(state);
+		}
+		state->ensmallen*=1.1f;
+	}
 	else state->player.yv+=GRAVITY;
 	if(state->player.xv>0.0f)state->player.xinvert=false;
 	else if(state->player.xv<0.0f)state->player.xinvert=true;
@@ -88,6 +100,8 @@ int core(struct state *state){
 		if(side==COLLIDE_TOP){
 			newparticle(state,enemy->base.x+(ENEMY_WIDTH/2.0f),enemy->base.y+(ENEMY_HEIGHT/2.0f),20,COLOR_BLACK);
 			enemy=deleteenemy(state,enemy,prevenemy);
+			state->player.text.timer=PHRASE_TIMER;
+			state->player.text.phrase=getplayerstompphrase();
 			continue;
 		}
 		else if(side==COLLIDE_LEFT||side==COLLIDE_RIGHT){
@@ -97,6 +111,8 @@ int core(struct state *state){
 				newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),20,COLOR_BLACK);
 				blast=deleteblast(state,blast,prevblast);
 				enemy=deleteenemy(state,enemy,prevenemy);
+				state->player.text.timer=PHRASE_TIMER;
+				state->player.text.phrase=getplayerblastphrase();
 				stop=true;
 				break;
 			}
@@ -120,7 +136,7 @@ int core(struct state *state){
 				}
 				if(stop)break;
 				if(collide(&collider,&state->player.base)){
-					enemy->text.timer=200;
+					enemy->text.timer=PHRASE_TIMER;
 					enemy->text.phrase=getenemyphrase();
 					enemy->attack=true;
 					break;
@@ -171,6 +187,19 @@ int core(struct state *state){
 			}
 			prevsilo=silo;
 			silo=silo->next;
+		}
+		if(stop)continue;
+		for(struct missile *missile=state->missilelist,*prevmissile=NULL;missile!=NULL;){
+			if(collide(&missile->base,&blast->base)){
+				newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),10,COLOR_BLACK);
+				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),10,COLOR_BLACK);
+				blast=deleteblast(state,blast,prevblast);
+				missile=deletemissile(state,missile,prevmissile);
+				stop=true;
+				break;
+			}
+			prevmissile=missile;
+			missile=missile->next;
 		}
 		if(stop)continue;
 		prevblast=blast;
@@ -279,6 +308,19 @@ int core(struct state *state){
 			}
 		}
 		if(stop)continue;
+		for(struct enemy *enemy=state->enemylist,*prevenemy=NULL;enemy!=NULL;){
+			if(collide(&flare->base,&enemy->base)){
+				newparticle(state,enemy->base.x+(ENEMY_WIDTH/2.0f),enemy->base.y+(ENEMY_HEIGHT/2.0f),30,COLOR_BLACK);
+				newparticle(state,flare->base.x+(FLARE_SIZE/2.0f),flare->base.y+(FLARE_SIZE/2.0f),10,COLOR_RED);
+				flare=deleteflare(state,flare,prevflare);
+				enemy=deleteenemy(state,enemy,prevenemy);
+				stop=true;
+				break;
+			}
+			prevenemy=enemy;
+			enemy=enemy->next;
+		}
+		if(stop)continue;
 		if(collide(&state->player.base,&flare->base)){
 			newparticle(state,flare->base.x+(FLARE_SIZE/2.0f),flare->base.y+(FLARE_SIZE/2.0f),30,COLOR_RED);
 			flare=deleteflare(state,flare,prevflare);
@@ -308,38 +350,40 @@ int core(struct state *state){
 		missile->base.y+=missile->yv;
 		
 		int stop=false;
-		if(missile->ttl<MISSILE_TTL-60&&missile->ttl>0){
+		if(missile->ttl<MISSILE_TTL-60){
 			if(collide(&missile->base,&state->player.base)){
 				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),30,COLOR_BLACK);
 				missile=deletemissile(state,missile,prevmissile);
 				continue;
 			}
-			for(int i=0;i<BLOCK_COUNT;++i){
-				if(collide(&state->block[i].base,&missile->base)&&!state->block[i].hidden){
-					newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30,COLOR_BLACK);
-					missile=deletemissile(state,missile,prevmissile);
-					stop=true;
-					break;
+			if(missile->ttl>0){
+				for(int i=0;i<BLOCK_COUNT;++i){
+					if(collide(&state->block[i].base,&missile->base)&&!state->block[i].hidden){
+						newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30,COLOR_BLACK);
+						missile=deletemissile(state,missile,prevmissile);
+						stop=true;
+						break;
+					}
 				}
+				if(stop)continue;
+				float angle=-atan2f((missile->base.y+(MISSILE_HEIGHT/2.0f))-(state->player.base.y+(PLAYER_HEIGHT/1.3f)),
+				(missile->base.x+(MISSILE_WIDTH/2.0f))-(state->player.base.x+(PLAYER_WIDTH/2.0f)));
+				align(&missile->base.rot,0.04,-angle);
+				missile->xv=-cosf(missile->base.rot)*MISSILE_SPEED;
+				missile->yv=-sinf(missile->base.rot)*MISSILE_SPEED;
 			}
-			if(stop)continue;
-			float angle=-atan2f((missile->base.y+(MISSILE_HEIGHT/2.0f))-(state->player.base.y+(PLAYER_HEIGHT/1.3f)),
-			(missile->base.x+(MISSILE_WIDTH/2.0f))-(state->player.base.x+(PLAYER_WIDTH/2.0f)));
-			align(&missile->base.rot,0.04,-angle);
-			missile->xv=-cosf(missile->base.rot)*MISSILE_SPEED;
-			missile->yv=-sinf(missile->base.rot)*MISSILE_SPEED;
-		}
-		else if(missile->ttl<1){
-			missile->yv+=GRAVITY/2.7f;
-			for(int i=0;i<BLOCK_COUNT;++i){
-				if(collide(&state->block[i].base,&missile->base)&&!state->block[i].hidden){
-					newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30,COLOR_BLACK);
-					missile=deletemissile(state,missile,prevmissile);
-					stop=true;
-					break;
+			else if(missile->ttl<1){
+				missile->yv+=GRAVITY/2.7f;
+				for(int i=0;i<BLOCK_COUNT;++i){
+					if(collide(&state->block[i].base,&missile->base)&&!state->block[i].hidden){
+						newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30,COLOR_BLACK);
+						missile=deletemissile(state,missile,prevmissile);
+						stop=true;
+						break;
+					}
 				}
+				if(stop)continue;
 			}
-			if(stop)continue;
 		}
 		
 		for(struct missile *missile2=state->missilelist,*prevmissile2=NULL;missile2!=NULL;){
@@ -397,58 +441,33 @@ int core(struct state *state){
 		state->player.success=true;
 	}
 	
-	if(state->populate){
-		state->populate=false;
-		state->teleporter.base.x=state->block[BLOCK_COUNT-2].base.x+0.25f;
-		state->teleporter.base.y=state->block[BLOCK_COUNT-2].base.y-TELEPORTER_HEIGHT;
-		state->teleporter.base.rot=0.0f;
-		state->teleporter.base.w=TELEPORTER_WIDTH;
-		state->teleporter.base.h=TELEPORTER_HEIGHT;
-		state->teleporter.base.count=3.0f;
-		state->teleporter.frame=0;
-		int enemycount=0;
-		int silocount=0;
-		do{
-			for(int i=5;i<BLOCK_COUNT-2;++i){
-				if(onein(4)&&!state->block[i].hidden&&enemycount<ENEMY_COUNT){
-					newenemy(state,i);
-					++enemycount;
-				}
-				if(onein(8)&&!state->block[i].hidden&&silocount<SILO_COUNT){
-					newsilo(state,i);
-					++silocount;
-				}
-			}
-		}while(silocount<SILO_COUNT||enemycount<ENEMY_COUNT);
-	}
 	dustroutine(state);
 	
 	// buttons
 	state->lbuttonstate=pointing(state->pointer,&state->lbutton);
 	state->rbuttonstate=pointing(state->pointer,&state->rbutton);
-	if(state->lbuttonstate){
+	if(state->lbuttonstate&&!state->player.dead&&!state->player.success){
 		state->player.xv-=PLAYER_ACCELERATE;
 		if(state->player.xv<-PLAYER_MAX_SPEED)state->player.xv=-PLAYER_MAX_SPEED;
 	}
-	else if(state->rbuttonstate){
+	else if(state->rbuttonstate&&!state->player.dead&&!state->player.success){
 		state->player.xv+=PLAYER_ACCELERATE;
 		if(state->player.xv>PLAYER_MAX_SPEED)state->player.xv=PLAYER_MAX_SPEED;
 	}
 	else zerof(&state->player.xv,PLAYER_ACCELERATE);
-	if(state->jbuttonstate=pointing(state->pointer,&state->jbutton)){
+	if(state->jbuttonstate=pointing(state->pointer,&state->jbutton)&&!state->player.dead&&!state->player.success){
 		if(state->player.canjump){
 			state->player.canjump=false;
 			state->player.yv=PLAYER_JUMP;
 		}
 	}
-	if((state->fbuttonstate=pointing(state->pointer,&state->fbutton))&&!state->player.reload){
+	if((state->fbuttonstate=pointing(state->pointer,&state->fbutton))&&!state->player.reload&&!state->player.dead&&!state->player.success){
 		newblast(state);
 	}
 	if((state->pbuttonstate=buttonprocess(state,&state->pbutton))==BUTTON_ACTIVATE||state->back){
 		state->back=false;
 		if(!menu_pause(state))return false;
 		if(state->showmenu){
-			reset(state);
 			return core(state);
 		}
 	}
@@ -474,6 +493,20 @@ void render(struct state *state){
 			else glUniform4f(state->uniform.rgba,1.0f,0.416f,0.0f,1.0f);
 			draw(state,&particle->base,0,false);
 		}
+	}
+	
+	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
+	glUniform4f(state->uniform.rgba,1.0f,0.0f,0.0f,1.0f);
+	uidraw(state,&state->lava,0);
+	
+	glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
+	for(int i=0;i<BLOCK_COUNT;++i){
+		if(!state->block[i].hidden)draw(state,&state->block[i].base,0,false);
+		/*else{
+			glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,0.3f);
+			draw(state,&state->block[i].base,0);
+			glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
+		}*/
 	}
 	
 	glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
@@ -507,20 +540,6 @@ void render(struct state *state){
 	
 	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_PLAYER].object);
 	draw(state,&state->player.base,state->player.frame,state->player.xinvert);
-	
-	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
-	glUniform4f(state->uniform.rgba,1.0f,0.0f,0.0f,1.0f);
-	uidraw(state,&state->lava,0);
-	
-	glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
-	for(int i=0;i<BLOCK_COUNT;++i){
-		if(!state->block[i].hidden)draw(state,&state->block[i].base,0,false);
-		/*else{
-			glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,0.3f);
-			draw(state,&state->block[i].base,0);
-			glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
-		}*/
-	}
 	
 	if(state->smokelist){
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
@@ -560,7 +579,7 @@ void render(struct state *state){
 	uidraw(state,&state->fbutton,state->fbuttonstate);
 	buttondraw(state,&state->pbutton);
 	
-	glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
+	glUniform4f(state->uniform.rgba,0.3f,0.3f,0.3f,1.0f);
 	int bound=false;
 	for(struct enemy *enemy=state->enemylist;enemy!=NULL;enemy=enemy->next){
 		if(enemy->text.timer){
@@ -571,7 +590,12 @@ void render(struct state *state){
 			drawtextcentered(state->font.dialog,enemy->base.x-(state->player.base.x+2.5f),enemy->base.y-1.0f,enemy->text.phrase);
 		}
 	}
+	if(state->player.text.timer){
+		if(!bound)glBindTexture(GL_TEXTURE_2D,state->font.dialog->atlas);
+		drawtextcentered(state->font.dialog,state->player.base.x-(state->player.base.x+2.5f),state->player.base.y-1.0f,state->player.text.phrase);
+	}
 	
+	glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 	glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_SYMBOL].object);
 	uidraw(state,&(struct base){state->lbutton.x+(BUTTON_WIDTH/2.0f)-0.5f,state->lbutton.y+(BUTTON_WIDTH/2.0f)-0.5f+(state->lbuttonstate?0.1f:0.0f),1.0f,1.0f,0.0f,5.0f},0);
 	uidraw(state,&(struct base){state->rbutton.x+(BUTTON_WIDTH/2.0f)-0.5f,state->rbutton.y+(BUTTON_WIDTH/2.0f)-0.5f+(state->rbuttonstate?0.1f:0.0f),1.0f,1.0f,0.0f,5.0f},1);
@@ -588,11 +612,9 @@ void render(struct state *state){
 			fps=0;
 		}
 		++fps;
+		glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
 		glBindTexture(GL_TEXTURE_2D,state->font.main->atlas);
 		drawtext(state->font.main,state->rect.left+3.0f,state->rect.top+0.1f,fpsstring);
-		char schtuff[30];
-		sprintf(schtuff,"yv: %f",state->player.yv);
-		drawtextcentered(state->font.main,0.0f,state->rect.top+0.1f,schtuff);
 	}
 }
 
@@ -617,9 +639,6 @@ void init(struct state *state){
 	state->pbutton=(struct button){{-7.5f,-4.3f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"",false};
 	state->buttonframe=(struct base){state->rect.right-1.25f,state->rect.top,1.25f,state->rect.bottom*2.0f,0.0f,1.0f};
 	state->lava=(struct base){state->rect.left,LAVA_Y,state->rect.right*2.0f,state->rect.bottom-LAVA_Y,0.0f,1.0f};
-	state->player.base.w=PLAYER_WIDTH;
-	state->player.base.h=PLAYER_HEIGHT;
-	state->player.base.count=8.0f;
 	state->enemylist=NULL;
 	state->blastlist=NULL;
 	state->particlelist=NULL;
@@ -632,6 +651,10 @@ void init(struct state *state){
 	state->dustlist=NULL;
 }
 void reset(struct state *state){
+	state->level=1;
+	reset_level(state);
+}
+void reset_level(struct state *state){
 	for(struct enemy *enemy=state->enemylist;enemy!=NULL;enemy=deleteenemy(state,enemy,NULL));
 	for(struct blast *blast=state->blastlist;blast!=NULL;blast=deleteblast(state,blast,NULL));
 	for(struct particle *particle=state->particlelist;particle!=NULL;particle=deleteparticle(state,particle,NULL));
@@ -643,7 +666,10 @@ void reset(struct state *state){
 	for(struct cloud *cloud=state->cloudlist;cloud!=NULL;cloud=deletecloud(state,cloud,NULL));
 	for(struct dust *dust=state->dustlist;dust!=NULL;dust=deletedust(state,dust,NULL));
 	newblocks(state);
-	state->populate=true;
+	state->ensmallen=0.00001f;
+	state->player.base.w=PLAYER_WIDTH;
+	state->player.base.h=PLAYER_HEIGHT;
+	state->player.base.count=8.0f;
 	state->player.base.x=0.0f;
 	state->player.base.y=state->block[1].base.y-PLAYER_HEIGHT;
 	state->player.xv=0.0f;
@@ -656,5 +682,27 @@ void reset(struct state *state){
 	state->player.canjump=true;
 	state->player.reload=0;
 	state->player.success=false;
+	state->player.dead=false;
 	state->player.text.timer=0;
+	state->teleporter.base.x=state->block[BLOCK_COUNT-2].base.x+0.25f;
+	state->teleporter.base.y=state->block[BLOCK_COUNT-2].base.y-TELEPORTER_HEIGHT;
+	state->teleporter.base.rot=0.0f;
+	state->teleporter.base.w=TELEPORTER_WIDTH;
+	state->teleporter.base.h=TELEPORTER_HEIGHT;
+	state->teleporter.base.count=3.0f;
+	state->teleporter.frame=0;
+	int enemycount=0;
+	int silocount=0;
+	do{
+		for(int i=5;i<BLOCK_COUNT-2;++i){
+			if(onein(4)&&!state->block[i].hidden&&enemycount<ENEMY_COUNT){
+				newenemy(state,i);
+				++enemycount;
+			}
+			if(onein(8)&&!state->block[i].hidden&&silocount<SILO_COUNT){
+				newsilo(state,i);
+				++silocount;
+			}
+		}
+	}while(silocount<SILO_COUNT||enemycount<ENEMY_COUNT);
 }

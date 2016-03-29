@@ -10,6 +10,7 @@
 #define LAVA_Y 3.75f
 #define COLOR_RED 1
 #define COLOR_BLACK 2
+#define PHRASE_TIMER 200
 #define torad(x) (x*(PI/180.0f))
 
 // gameplay
@@ -48,8 +49,8 @@ struct base{
 struct player{
 	struct base base;
 	float xv,yv;
-	int lives,canjump,frame,frametimer,xinvert,reload,success;
-	struct{char *phrase;int timer;}text;
+	int lives,canjump,frame,frametimer,xinvert,reload,success,dead;
+	struct{const char *phrase;int timer;}text;
 };
 
 #define TELEPORTER_WIDTH 2.0f
@@ -173,7 +174,8 @@ struct button{
 };
 
 struct state{
-	int running,populate,showmenu,back,musicenabled,soundenabled,vibenabled,showtut;
+	int running,showmenu,back,musicenabled,soundenabled,vibenabled,showtut,level;
+	float ensmallen;
 	unsigned vao,vbo,program;
 	struct pack assets,uiassets;
 	struct apack aassets;
@@ -210,6 +212,7 @@ struct state{
 int process(struct android_app*);
 void init(struct state*);
 void reset(struct state*);
+void reset_level(struct state*);
 int core(struct state*);
 void render(struct state*);
 
@@ -228,6 +231,9 @@ int menu_message(struct state*,const char*,const char*,int*);
 void saveconf(struct state*);
 int readconf(struct state*);
 const char *getenemyphrase();
+const char *getplayerblastphrase();
+const char *getplayerstompphrase();
+const char *getplayerresphrase();
 
 void newdust(struct state*);
 void dustroutine(struct state*);
