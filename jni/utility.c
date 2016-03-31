@@ -47,6 +47,23 @@ const char *getplayerresphrase(){
 	return playerresphrase[randomint(0,4)];
 }
 
+void whiteout(struct state *state){
+	const float FADE=0.015f;
+	struct base base={state->rect.left,state->rect.top,state->rect.right*2.0f,state->rect.bottom*2.0f,0.0f,1.0f};
+	glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,state->whiteout);
+	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
+	uidraw(state,&base,0.0f);
+	if(state->enablewhiteout){
+		if((state->whiteout+=FADE)>1.0f){
+			state->whiteout=1.0f;
+			state->enablewhiteout=false;
+		}
+	}
+	else{
+		zerof(&state->whiteout,FADE);
+	}
+}
+
 int buttonprocess0(struct state *state,struct button *button){
 	if(state->pointer[0].x>button->base.x&&state->pointer[0].x<button->base.x+button->base.w&&
 	state->pointer[0].y>button->base.y&&state->pointer[0].y<button->base.y+button->base.h){
@@ -89,7 +106,7 @@ int buttonprocess(struct state *state,struct button *button){
 }
 int buttondraw(struct state *state,struct button *button){
 	int bstate=buttonprocess(state,button);
-	uidraw(state,&button->base,bstate==BUTTON_PRESS?1:0);
+	uidraw(state,&button->base,bstate==BUTTON_PRESS?1.0f:0.0f);
 	return bstate;
 }
 void buttondrawtext(ftfont* font,struct button *button){

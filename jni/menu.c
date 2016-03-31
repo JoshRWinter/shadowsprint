@@ -15,7 +15,9 @@ int menu_main(struct state *state){
 	struct button configbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.1f)*2.0f),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Settings",false};
 	struct button quitbutton={{bleftoffset,btopoffset+((BUTTON_HEIGHT+0.1f)*3.0f),BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Quit",false};
 	state->showmenu=false;
+	int play=false;
 	while(process(state->app)){
+		glClear(GL_COLOR_BUFFER_BIT);
 		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BACKGROUND].object);
 		uidraw(state,&state->background,0);
@@ -25,7 +27,8 @@ int menu_main(struct state *state){
 		dustrender(state);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(buttondraw(state,&playbutton)==BUTTON_ACTIVATE){
-			return true;
+			state->enablewhiteout=true;
+			play=true;
 		}
 		if(buttondraw(state,&abootbutton)==BUTTON_ACTIVATE){
 			if(!menu_message(state,"Aboot",aboottext,NULL))return false;
@@ -47,7 +50,9 @@ int menu_main(struct state *state){
 		drawtextcentered(state->font.main,-2.0f,-2.0f,"");
 		glBindTexture(GL_TEXTURE_2D,state->font.header->atlas);
 		drawtextcentered(state->font.header,-2.0f,-3.0f,"SHADOW SPRINT");
+		if(state->enablewhiteout||state->whiteout>0.0f)whiteout(state);
 		eglSwapBuffers(state->display,state->surface);
+		if(!state->enablewhiteout&&play)return true;
 	}
 	return false;
 }
@@ -60,6 +65,7 @@ int menu_pause(struct state *state){
 	struct button quitbutton={{1.0f,-1.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Quit",false};
 	struct button confmenubutton={{-3.0f,-1.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Settings",false};
 	while(process(state->app)){
+		glClear(GL_COLOR_BUFFER_BIT);
 		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BACKGROUND].object);
 		uidraw(state,&state->background,0.0f);
@@ -117,6 +123,7 @@ int menu_conf(struct state *state){
 	int changed=false;
 	char settings[121];
 	while(process(state->app)){
+		glClear(GL_COLOR_BUFFER_BIT);
 		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BACKGROUND].object);
 		uidraw(state,&state->background,0.0f);
@@ -180,6 +187,7 @@ int menu_message(struct state *state,const char *caption,const char *msg,int *ye
 	struct button yesbutton={{5.8f,-2.0,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Yes",false};
 	struct button nobutton={{4.5f,0.25f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"No",false};
 	while(process(state->app)){
+		glClear(GL_COLOR_BUFFER_BIT);
 		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BACKGROUND].object);
 		uidraw(state,&state->background,0);

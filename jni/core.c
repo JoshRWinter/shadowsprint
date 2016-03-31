@@ -9,19 +9,30 @@ int core(struct state *state){
 		if(!menu_main(state))return false;
 	}
 	
+	if(state->skycolor!=state->level){
+		state->skycolor=state->level;
+		if(state->skycolor==1)
+			glClearColor(COLOR_WHITE);
+		else if(state->skycolor==2)
+			glClearColor(COLOR_NIGHT);
+		else glClearColor(COLOR_MORNIN);
+	}
+	
 	if(state->player.text.timer)--state->player.text.timer;
 	if(state->player.reload)--state->player.reload;
 	if(state->player.success){
 		state->player.text.timer=0;
-		if(zerof(&state->player.base.w,state->ensmallen)!=0.0f&&zerof(&state->player.base.h,state->ensmallen*1.2f)!=0.0){
-			state->player.base.x+=state->ensmallen/2.0f;
+		if(zerof(&state->player.base.h,state->ensmallen*1.2f)!=0.0){
 			state->player.base.y+=state->ensmallen/2.0f;
+			targetf(&state->player.base.y,fabs(state->teleporter.base.y+1.3f-state->player.base.y)/10.0f+0.003f,state->teleporter.base.y+1.3f);
 			targetf(&state->player.base.x,0.1f,state->teleporter.base.x+(TELEPORTER_WIDTH/2.0f)-(state->player.base.w/2.0f));
 		}
-		if(state->ensmallen>150.0f){
+		if(!state->enablewhiteout&&state->player.base.h==0.0f){
+			++state->level;
 			reset_level(state);
 		}
 		state->ensmallen*=1.1f;
+		if(state->ensmallen>0.01f)state->enablewhiteout=true;
 	}
 	else state->player.yv+=GRAVITY;
 	if(state->player.xv>0.0f)state->player.xinvert=false;
@@ -579,7 +590,10 @@ void render(struct state *state){
 	uidraw(state,&state->fbutton,state->fbuttonstate);
 	buttondraw(state,&state->pbutton);
 	
-	glUniform4f(state->uniform.rgba,0.3f,0.3f,0.3f,1.0f);
+	if(state->level==1)
+		glUniform4f(state->uniform.rgba,0.8f,0.1f,0.1f,1.0f);
+	else
+		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 	int bound=false;
 	for(struct enemy *enemy=state->enemylist;enemy!=NULL;enemy=enemy->next){
 		if(enemy->text.timer){
@@ -602,6 +616,8 @@ void render(struct state *state){
 	uidraw(state,&(struct base){state->jbutton.x+(BUTTON_WIDTH/2.0f)-0.5f,state->jbutton.y+(BUTTON_WIDTH/2.0f)-0.5f+(state->jbuttonstate?0.1f:0.0f),1.0f,1.0f,0.0f,5.0f},2);
 	uidraw(state,&(struct base){state->fbutton.x+(BUTTON_WIDTH/2.0f)-0.5f,state->fbutton.y+(BUTTON_WIDTH/2.0f)-0.5f+(state->fbuttonstate?0.1f:0.0f),1.0f,1.0f,0.0f,5.0f},3);
 	uidraw(state,&(struct base){state->pbutton.base.x+(BUTTON_WIDTH/2.0f)-0.5f,state->pbutton.base.y+(BUTTON_WIDTH/2.0f)-0.5f+(state->pbuttonstate?0.1f:0.0f),1.0f,1.0f,0.0f,5.0f},4);
+	
+	if(state->enablewhiteout||state->whiteout>0.0f)whiteout(state);
 	
 	{
 		static int fps,lasttime=0;
@@ -626,6 +642,9 @@ void init(struct state *state){
 		state->showtut=true;
 	}
 	else state->showtut=false;
+	state->skycolor=1;
+	state->enablewhiteout=false;
+	state->whiteout=0.0f;
 	state->showmenu=true;
 	state->back=false;
 	memset(state->pointer,0,sizeof(struct crosshair)*2);
@@ -652,6 +671,7 @@ void init(struct state *state){
 }
 void reset(struct state *state){
 	state->level=1;
+	state->enablewhiteout=false;
 	reset_level(state);
 }
 void reset_level(struct state *state){

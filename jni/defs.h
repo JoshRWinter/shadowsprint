@@ -10,6 +10,9 @@
 #define LAVA_Y 3.75f
 #define COLOR_RED 1
 #define COLOR_BLACK 2
+#define COLOR_WHITE 1.0f,1.0f,1.0f,1.0f
+#define COLOR_NIGHT 0.75f,0.0f,1.0f,1.0f
+#define COLOR_MORNIN 1.0f,0.45f,0.6f,1.0f
 #define PHRASE_TIMER 200
 #define torad(x) (x*(PI/180.0f))
 
@@ -174,8 +177,8 @@ struct button{
 };
 
 struct state{
-	int running,showmenu,back,musicenabled,soundenabled,vibenabled,showtut,level;
-	float ensmallen;
+	int running,showmenu,back,musicenabled,soundenabled,vibenabled,showtut,level,skycolor,enablewhiteout;
+	float ensmallen,whiteout;
 	unsigned vao,vbo,program;
 	struct pack assets,uiassets;
 	struct apack aassets;
@@ -234,6 +237,7 @@ const char *getenemyphrase();
 const char *getplayerblastphrase();
 const char *getplayerstompphrase();
 const char *getplayerresphrase();
+void whiteout(struct state*);
 
 void newdust(struct state*);
 void dustroutine(struct state*);
