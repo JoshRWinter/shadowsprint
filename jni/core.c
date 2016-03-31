@@ -17,6 +17,22 @@ int core(struct state *state){
 			glClearColor(COLOR_NIGHT);
 		else glClearColor(COLOR_MORNIN);
 	}
+	if(state->player.dead){
+		state->player.text.timer=0;
+		++state->player.dead;
+		if(state->player.dead>PLAYER_DEAD_TIMER){
+			--state->player.lives;
+			reset_player(state);
+			state->player.text.phrase=getplayerresphrase();
+			state->player.text.timer=PHRASE_TIMER;
+		}
+		else if(state->player.dead==PLAYER_DEAD_TIMER/1.5){
+			newparticle(state,state->player.base.x+(PLAYER_WIDTH/2.0f),state->player.base.y+(PLAYER_HEIGHT/2.0f),30,COLOR_BLACK);
+		}
+		else if(state->player.dead>PLAYER_DEAD_TIMER/1.5){
+			targetf(&state->player.base.x,fabs(state->player.base.x-(state->block[state->player.lastblock].base.x+(state->block[state->player.lastblock].base.w/2.0f)))/10.0f+0.01f,(state->block[state->player.lastblock].base.x+(state->block[state->player.lastblock].base.w/2.0f)));
+		}
+	}
 	
 	if(state->player.text.timer)--state->player.text.timer;
 	if(state->player.reload)--state->player.reload;
@@ -39,6 +55,11 @@ int core(struct state *state){
 	else if(state->player.xv<0.0f)state->player.xinvert=true;
 	state->player.base.y+=state->player.yv;
 	state->player.base.x+=state->player.xv;
+	if(state->player.base.y+PLAYER_HEIGHT>LAVA_Y){
+		if(!state->player.dead)state->player.dead=true;
+		state->player.yv=0.005f;
+		targetf(&state->player.base.rot,0.05,PI/4.0f);
+	}
 	for(int i=0;i<BLOCK_COUNT&&!state->player.success;++i){
 		if(state->block[i].hidden)continue;
 		int side;
@@ -47,6 +68,7 @@ int core(struct state *state){
 				state->player.yv=0.0f;
 				state->player.base.y=state->block[i].base.y-PLAYER_HEIGHT;
 				state->player.canjump=true;
+				state->player.lastblock=i;
 			}
 			else if(side==COLLIDE_LEFT){
 				state->player.xv=0.0f;
@@ -107,7 +129,7 @@ int core(struct state *state){
 				}
 			}
 		}
-		side=correct(&state->player.base,&enemy->base);
+		side=state->player.dead?0:correct(&state->player.base,&enemy->base);
 		if(side==COLLIDE_TOP){
 			newparticle(state,enemy->base.x+(ENEMY_WIDTH/2.0f),enemy->base.y+(ENEMY_HEIGHT/2.0f),20,COLOR_BLACK);
 			enemy=deleteenemy(state,enemy,prevenemy);
@@ -116,6 +138,7 @@ int core(struct state *state){
 			continue;
 		}
 		else if(side==COLLIDE_LEFT||side==COLLIDE_RIGHT){
+			if(!state->player.dead)state->player.dead=true;
 		}
 		for(struct blast *blast=state->blastlist,*prevblast=NULL;blast!=NULL;){
 			if(collide(&blast->base,&enemy->base)){
@@ -335,6 +358,7 @@ int core(struct state *state){
 		if(collide(&state->player.base,&flare->base)){
 			newparticle(state,flare->base.x+(FLARE_SIZE/2.0f),flare->base.y+(FLARE_SIZE/2.0f),30,COLOR_RED);
 			flare=deleteflare(state,flare,prevflare);
+			if(!state->player.dead)state->player.dead=true;
 			continue;
 		}
 		prevflare=flare;
@@ -342,7 +366,7 @@ int core(struct state *state){
 	}
 	
 	for(struct silo *silo=state->silolist;silo!=NULL;silo=silo->next){
-		if(fabs((silo->base.x+(SILO_WIDTH/2.0f))-(state->player.base.x+(PLAYER_WIDTH/2.0f)))<SILO_RANGE&&!silo->missile){
+		if(fabs((silo->base.x+(SILO_WIDTH/2.0f))-(state->player.base.x+(PLAYER_WIDTH/2.0f)))<SILO_RANGE&&!silo->missile&&!state->player.dead){
 			newmissile(state,silo);
 		}
 	}
@@ -365,9 +389,14 @@ int core(struct state *state){
 			if(collide(&missile->base,&state->player.base)){
 				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),30,COLOR_BLACK);
 				missile=deletemissile(state,missile,prevmissile);
+				if(!state->player.dead)state->player.dead=true;
 				continue;
 			}
 			if(missile->ttl>0){
+				if(state->player.dead){
+					missile->ttl=0;
+					continue;
+				}
 				for(int i=0;i<BLOCK_COUNT;++i){
 					if(collide(&state->block[i].base,&missile->base)&&!state->block[i].hidden){
 						newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30,COLOR_BLACK);
@@ -549,8 +578,10 @@ void render(struct state *state){
 			draw(state,&enemy->base,0.0f,enemy->xv>0.0f?true:false);
 	}
 	
-	glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_PLAYER].object);
-	draw(state,&state->player.base,state->player.frame,state->player.xinvert);
+	if(state->player.dead<PLAYER_DEAD_TIMER/1.5){
+		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_PLAYER].object);
+		draw(state,&state->player.base,state->player.dead?7:state->player.frame,state->player.xinvert);
+	}
 	
 	if(state->smokelist){
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_BLOCK].object);
@@ -591,7 +622,7 @@ void render(struct state *state){
 	buttondraw(state,&state->pbutton);
 	
 	if(state->level==1)
-		glUniform4f(state->uniform.rgba,0.8f,0.1f,0.1f,1.0f);
+		glUniform4f(state->uniform.rgba,0.2f,0.2f,0.2f,1.0f);
 	else
 		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 	int bound=false;
@@ -606,8 +637,14 @@ void render(struct state *state){
 	}
 	if(state->player.text.timer){
 		if(!bound)glBindTexture(GL_TEXTURE_2D,state->font.dialog->atlas);
+		bound=true;
 		drawtextcentered(state->font.dialog,state->player.base.x-(state->player.base.x+2.5f),state->player.base.y-1.0f,state->player.text.phrase);
 	}
+	glBindTexture(GL_TEXTURE_2D,state->font.main->atlas);
+	char livestext[20];
+	sprintf(livestext,"Lives: %d",state->player.lives);
+	drawtextcentered(state->font.main,0.0f,state->rect.top+0.2f,livestext);
+	
 	
 	glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 	glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_SYMBOL].object);
@@ -671,6 +708,7 @@ void init(struct state *state){
 }
 void reset(struct state *state){
 	state->level=1;
+	state->player.lives=3;
 	state->enablewhiteout=false;
 	reset_level(state);
 }
@@ -687,23 +725,9 @@ void reset_level(struct state *state){
 	for(struct dust *dust=state->dustlist;dust!=NULL;dust=deletedust(state,dust,NULL));
 	newblocks(state);
 	state->ensmallen=0.00001f;
-	state->player.base.w=PLAYER_WIDTH;
-	state->player.base.h=PLAYER_HEIGHT;
-	state->player.base.count=8.0f;
+	state->player.lastblock=1;
 	state->player.base.x=0.0f;
-	state->player.base.y=state->block[1].base.y-PLAYER_HEIGHT;
-	state->player.xv=0.0f;
-	state->player.yv=0.0f;
-	state->player.frame=0;
-	state->player.frametimer=0;
-	state->player.base.rot=0.0f;
-	state->player.xinvert=false;
-	state->player.lives=3;
-	state->player.canjump=true;
-	state->player.reload=0;
-	state->player.success=false;
-	state->player.dead=false;
-	state->player.text.timer=0;
+	reset_player(state);
 	state->teleporter.base.x=state->block[BLOCK_COUNT-2].base.x+0.25f;
 	state->teleporter.base.y=state->block[BLOCK_COUNT-2].base.y-TELEPORTER_HEIGHT;
 	state->teleporter.base.rot=0.0f;
@@ -725,4 +749,21 @@ void reset_level(struct state *state){
 			}
 		}
 	}while(silocount<SILO_COUNT||enemycount<ENEMY_COUNT);
+}
+void reset_player(struct state *state){
+	state->player.base.w=PLAYER_WIDTH;
+	state->player.base.h=PLAYER_HEIGHT;
+	state->player.base.count=8.0f;
+	state->player.base.y=state->rect.top-PLAYER_HEIGHT;
+	state->player.xv=0.0f;
+	state->player.yv=0.0f;
+	state->player.frame=0;
+	state->player.frametimer=0;
+	state->player.base.rot=0.0f;
+	state->player.xinvert=false;
+	state->player.canjump=true;
+	state->player.reload=0;
+	state->player.success=false;
+	state->player.dead=false;
+	state->player.text.timer=0;
 }

@@ -47,12 +47,13 @@ struct base{
 #define PLAYER_FRAME_TIMER 4
 #define PLAYER_MAX_SPEED 0.1f
 #define PLAYER_ACCELERATE 0.01f
+#define PLAYER_DEAD_TIMER 120
 #define PLAYER_WIDTH 1.0166f
 #define PLAYER_HEIGHT 1.3833f
 struct player{
 	struct base base;
 	float xv,yv;
-	int lives,canjump,frame,frametimer,xinvert,reload,success,dead;
+	int lives,canjump,frame,frametimer,xinvert,reload,success,dead,lastblock;
 	struct{const char *phrase;int timer;}text;
 };
 
@@ -216,6 +217,7 @@ int process(struct android_app*);
 void init(struct state*);
 void reset(struct state*);
 void reset_level(struct state*);
+void reset_player(struct state*);
 int core(struct state*);
 void render(struct state*);
 

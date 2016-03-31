@@ -49,7 +49,7 @@ void init_display(struct state *state){
 	glClearColor(COLOR_WHITE);
 	set_ftfont_params(screenres.w,screenres.h,state->rect.right*2.0f,state->rect.bottom*2.0f,state->uniform.vector,state->uniform.size,state->uniform.texcoords);
 	state->font.main=create_ftfont(state->app->activity->assetManager,0.425f,"corbel.ttf");
-	state->font.dialog=create_ftfont(state->app->activity->assetManager,0.65f,"corbel.ttf");
+	state->font.dialog=create_ftfont(state->app->activity->assetManager,0.575f,"corbel.ttf");
 	state->font.header=create_ftfont(state->app->activity->assetManager,0.9f,"BAUHS93.TTF");
 	loadapack(&state->aassets,state->app->activity->assetManager,"aassets");
 	state->soundengine=initOpenSL();
