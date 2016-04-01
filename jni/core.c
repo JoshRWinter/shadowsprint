@@ -30,6 +30,13 @@ int core(struct state *state){
 			newparticle(state,state->player.base.x+(PLAYER_WIDTH/2.0f),state->player.base.y+(PLAYER_HEIGHT/2.0f),30,COLOR_BLACK);
 		}
 		else if(state->player.dead>PLAYER_DEAD_TIMER/1.5){
+			if(state->player.lives==1){
+				reset(state);
+				state->whiteout=1.0f;
+				state->showmenu=true;
+				if(!menu_gameover(state))return false;
+				return core(state);
+			}
 			targetf(&state->player.base.x,fabs(state->player.base.x-(state->block[state->player.lastblock].base.x+(state->block[state->player.lastblock].base.w/2.0f)))/10.0f+0.01f,(state->block[state->player.lastblock].base.x+(state->block[state->player.lastblock].base.w/2.0f)));
 		}
 	}
@@ -44,7 +51,14 @@ int core(struct state *state){
 			targetf(&state->player.base.x,0.1f,state->teleporter.base.x+(TELEPORTER_WIDTH/2.0f)-(state->player.base.w/2.0f));
 		}
 		if(!state->enablewhiteout&&state->player.base.h==0.0f){
-			++state->level;
+			if(++state->level>3){
+				reset(state);
+				state->whiteout=1.0f;
+				state->enablewhiteout=true;
+				state->showmenu=true;
+				if(!menu_victory(state))return false;
+				return core(state);
+			}
 			reset_level(state);
 		}
 		state->ensmallen*=1.1f;
@@ -138,7 +152,7 @@ int core(struct state *state){
 			continue;
 		}
 		else if(side==COLLIDE_LEFT||side==COLLIDE_RIGHT){
-			if(!state->player.dead)state->player.dead=true;
+			if(!state->player.dead&&!state->player.success)state->player.dead=true;
 		}
 		for(struct blast *blast=state->blastlist,*prevblast=NULL;blast!=NULL;){
 			if(collide(&blast->base,&enemy->base)){
@@ -355,7 +369,7 @@ int core(struct state *state){
 			enemy=enemy->next;
 		}
 		if(stop)continue;
-		if(collide(&state->player.base,&flare->base)){
+		if(collide(&state->player.base,&flare->base)&&!state->player.dead&&!state->player.success){
 			newparticle(state,flare->base.x+(FLARE_SIZE/2.0f),flare->base.y+(FLARE_SIZE/2.0f),30,COLOR_RED);
 			flare=deleteflare(state,flare,prevflare);
 			if(!state->player.dead)state->player.dead=true;
@@ -386,7 +400,7 @@ int core(struct state *state){
 		
 		int stop=false;
 		if(missile->ttl<MISSILE_TTL-60){
-			if(collide(&missile->base,&state->player.base)){
+			if(collide(&missile->base,&state->player.base)&&!state->player.dead&&!state->player.success){
 				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),30,COLOR_BLACK);
 				missile=deletemissile(state,missile,prevmissile);
 				if(!state->player.dead)state->player.dead=true;

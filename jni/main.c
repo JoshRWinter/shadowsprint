@@ -46,7 +46,9 @@ void init_display(struct state *state){
 	glVertexAttribPointer(0,2,GL_FLOAT,false,0,NULL);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-	glClearColor(COLOR_WHITE);
+	if(state->level==1)glClearColor(COLOR_WHITE);
+	else if(state->level==2)glClearColor(COLOR_NIGHT);
+	else glClearColor(COLOR_MORNIN);
 	set_ftfont_params(screenres.w,screenres.h,state->rect.right*2.0f,state->rect.bottom*2.0f,state->uniform.vector,state->uniform.size,state->uniform.texcoords);
 	state->font.main=create_ftfont(state->app->activity->assetManager,0.425f,"corbel.ttf");
 	state->font.dialog=create_ftfont(state->app->activity->assetManager,0.575f,"corbel.ttf");

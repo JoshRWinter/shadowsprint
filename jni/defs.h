@@ -34,6 +34,8 @@
 #define TID_BUTTON 1
 #define TID_BUTTONFRAME 2
 #define TID_SYMBOL 3
+#define TID_VICTORY 4
+#define TID_GAMEOVER 5
 
 // sound
 #define SID_THEME 0
@@ -232,6 +234,8 @@ int correct(struct base*,struct base*);
 int menu_main(struct state*);
 int menu_pause(struct state*);
 int menu_conf(struct state*);
+int menu_gameover(struct state*);
+int menu_victory(struct state*);
 int menu_message(struct state*,const char*,const char*,int*);
 void saveconf(struct state*);
 int readconf(struct state*);

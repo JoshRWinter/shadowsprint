@@ -182,6 +182,56 @@ int menu_conf(struct state *state){
 	return false;
 }
 
+int menu_gameover(struct state *state){
+	struct base base={state->rect.left,state->rect.top,state->rect.right*2.0f,state->rect.bottom*2.0f,0.0f,1.0f};
+	int timer=70;
+	int active=false;
+	while(process(state->app)){
+		glClear(GL_COLOR_BUFFER_BIT);
+		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
+		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_GAMEOVER].object);
+		uidraw(state,&base,0.0f);
+		if(timer)--timer;
+		else{
+			glBindTexture(GL_TEXTURE_2D,state->font.main->atlas);
+			drawtext(state->font.main,state->rect.left+0.2f,state->rect.bottom-0.2f-state->font.main->fontsize,"Tap anywhere to continue...");
+			if((active&&!state->pointer[0].active)||state->back){
+				state->back=false;
+				return true;
+			}
+			active=state->pointer[0].active;
+		}
+		whiteout(state);
+		eglSwapBuffers(state->display,state->surface);
+	}
+	return false;
+}
+
+int menu_victory(struct state *state){
+	struct base base={state->rect.left,state->rect.top,state->rect.right*2.0f,state->rect.bottom*2.0f,0.0f,1.0f};
+	int timer=70;
+	int active=false;
+	while(process(state->app)){
+		glClear(GL_COLOR_BUFFER_BIT);
+		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
+		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_VICTORY].object);
+		uidraw(state,&base,0.0f);
+		if(timer)--timer;
+		else{
+			glBindTexture(GL_TEXTURE_2D,state->font.main->atlas);
+			drawtext(state->font.main,state->rect.left+0.2f,state->rect.bottom-0.2f-state->font.main->fontsize,"Tap anywhere to continue...");
+			if((active&&!state->pointer[0].active)||state->back){
+				state->back=false;
+				return true;
+			}
+			active=state->pointer[0].active;
+		}
+		whiteout(state);
+		eglSwapBuffers(state->display,state->surface);
+	}
+	return false;
+}
+
 int menu_message(struct state *state,const char *caption,const char *msg,int *yesno){
 	struct button okbutton={{5.8f,-BUTTON_HEIGHT/2.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Mmkay",false};
 	struct button yesbutton={{5.8f,-2.0,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Yes",false};
