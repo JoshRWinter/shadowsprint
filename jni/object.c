@@ -232,7 +232,9 @@ struct missile *deletemissile(struct state *state,struct missile *missile,struct
 }
 
 void newlife(struct state *state,struct enemy *enemy){
-	//if(state->player.lives>2)return;
+	int lifecount=0;
+	for(struct life *life=state->lifelist;life!=NULL;life=life->next,++lifecount);
+	if(state->player.lives+lifecount>2)return;
 	struct life *life=malloc(sizeof(struct life));
 	life->base.w=LIFE_SIZE;
 	life->base.h=LIFE_SIZE;

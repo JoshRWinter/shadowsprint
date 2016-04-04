@@ -155,7 +155,7 @@ struct missile{
 };
 
 #define LIFE_SIZE 1.0f
-#define LIFE_PROBABILITY 1
+#define LIFE_PROBABILITY 4
 struct life{
 	struct base base;
 	float xv,yv;

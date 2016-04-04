@@ -366,6 +366,7 @@ int core(struct state *state){
 		if(stop)continue;
 		for(struct enemy *enemy=state->enemylist,*prevenemy=NULL;enemy!=NULL;){
 			if(collide(&flare->base,&enemy->base)){
+				if(onein(LIFE_PROBABILITY))newlife(state,enemy);
 				newparticle(state,enemy->base.x+(ENEMY_WIDTH/2.0f),enemy->base.y+(ENEMY_HEIGHT/2.0f),30,COLOR_BLACK);
 				newparticle(state,flare->base.x+(FLARE_SIZE/2.0f),flare->base.y+(FLARE_SIZE/2.0f),10,COLOR_RED);
 				flare=deleteflare(state,flare,prevflare);
@@ -494,7 +495,7 @@ int core(struct state *state){
 		life->base.y+=life->yv;
 		zerof(&life->xv,0.002f);
 		life->yv+=GRAVITY;
-		life->base.rot+=life->xv/1.1f;
+		life->base.rot+=life->xv;///1.1f;
 		if(life->base.y>state->rect.bottom){
 			life=deletelife(state,life,prevlife);
 			continue;
@@ -551,7 +552,7 @@ int core(struct state *state){
 					break;
 				}
 			}
-			if(!occupied)newflare(state,i);
+			if(!occupied&&fabs((state->block[i].base.x+(state->block[i].base.w/2.0f))-(state->player.base.x+(PLAYER_WIDTH/2.0f)))<8.0f)newflare(state,i);
 		}
 	}
 	
@@ -742,7 +743,7 @@ void render(struct state *state){
 	
 	if(state->enablewhiteout||state->whiteout>0.0f)whiteout(state);
 	
-	{
+	/*{
 		static int fps,lasttime=0;
 		static char fpsstring[20];
 		if(lasttime!=time(NULL)){
@@ -754,7 +755,7 @@ void render(struct state *state){
 		glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
 		glBindTexture(GL_TEXTURE_2D,state->font.main->atlas);
 		drawtext(state->font.main,state->rect.left+3.0f,state->rect.top+0.1f,fpsstring);
-	}
+	}*/
 }
 
 void init(struct state *state){
