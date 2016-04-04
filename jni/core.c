@@ -27,7 +27,9 @@ int core(struct state *state){
 			state->player.text.timer=PHRASE_TIMER;
 		}
 		else if(state->player.dead==PLAYER_DEAD_TIMER/1.5){
+			if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 			newparticle(state,state->player.base.x+(PLAYER_WIDTH/2.0f),state->player.base.y+(PLAYER_HEIGHT/2.0f),30,COLOR_BLACK);
+			if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 		}
 		else if(state->player.dead>PLAYER_DEAD_TIMER/1.5){
 			if(state->player.lives==1){
@@ -148,6 +150,7 @@ int core(struct state *state){
 		}
 		side=state->player.dead?0:correct(&state->player.base,&enemy->base);
 		if(side==COLLIDE_TOP){
+			if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 			newparticle(state,enemy->base.x+(ENEMY_WIDTH/2.0f),enemy->base.y+(ENEMY_HEIGHT/2.0f),20,COLOR_BLACK);
 			if(onein(LIFE_PROBABILITY))newlife(state,enemy);
 			enemy=deleteenemy(state,enemy,prevenemy);
@@ -164,6 +167,7 @@ int core(struct state *state){
 		for(struct blast *blast=state->blastlist,*prevblast=NULL;blast!=NULL;){
 			if(collide(&blast->base,&enemy->base)){
 				if(onein(LIFE_PROBABILITY))newlife(state,enemy);
+				if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 				newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),20,COLOR_BLACK);
 				blast=deleteblast(state,blast,prevblast);
 				enemy=deleteenemy(state,enemy,prevenemy);
@@ -213,6 +217,7 @@ int core(struct state *state){
 			if(++blast->frame>3)blast->frame=0;
 		}
 		if(!blast->ttl--){
+			if(state->soundenabled&&inrange(&state->player.base,&blast->base,state->rect.right))playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 			newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),20,COLOR_BLACK);
 			blast=deleteblast(state,blast,prevblast);
 			continue;
@@ -221,6 +226,7 @@ int core(struct state *state){
 		for(int i=0;i<BLOCK_COUNT;++i){
 			if(state->block[i].hidden)continue;
 			if(collide(&state->block[i].base,&blast->base)){
+				if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 				newparticle(state,blast->xv>0.0f?blast->base.x+BLAST_WIDTH:blast->base.x,blast->base.y+(BLAST_HEIGHT/2.0f),20,COLOR_BLACK);
 				blast=deleteblast(state,blast,prevblast);
 				stop=true;
@@ -231,10 +237,12 @@ int core(struct state *state){
 		for(struct silo *silo=state->silolist,*prevsilo=NULL;silo!=NULL;){
 			if(collide(&blast->base,&silo->base)){
 				if((silo->health-=randomint(40,60))<1){
+					if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 					newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),30,COLOR_BLACK);
 					silo=deletesilo(state,silo,prevsilo);
 				}
 				else{
+					if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 					newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),10,COLOR_BLACK);
 				}
 				blast=deleteblast(state,blast,prevblast);
@@ -247,6 +255,7 @@ int core(struct state *state){
 		if(stop)continue;
 		for(struct missile *missile=state->missilelist,*prevmissile=NULL;missile!=NULL;){
 			if(collide(&missile->base,&blast->base)){
+				if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 				newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),10,COLOR_BLACK);
 				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),10,COLOR_BLACK);
 				blast=deleteblast(state,blast,prevblast);
@@ -347,6 +356,7 @@ int core(struct state *state){
 			if(side=correct(&flare->base,&state->block[i].base)){
 				switch(side){
 					case COLLIDE_TOP:
+						if(state->soundenabled&&inrange(&flare->base,&state->block[i].base,state->rect.right))playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 						newparticle(state,flare->base.x+(FLARE_SIZE/2.0f),state->block[i].base.y,30,COLOR_RED);
 						flare=deleteflare(state,flare,prevflare);
 						stop=true;
@@ -367,6 +377,7 @@ int core(struct state *state){
 		for(struct enemy *enemy=state->enemylist,*prevenemy=NULL;enemy!=NULL;){
 			if(collide(&flare->base,&enemy->base)){
 				if(onein(LIFE_PROBABILITY))newlife(state,enemy);
+				if(state->soundenabled&&inrange(&flare->base,&enemy->base,state->rect.right))playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 				newparticle(state,enemy->base.x+(ENEMY_WIDTH/2.0f),enemy->base.y+(ENEMY_HEIGHT/2.0f),30,COLOR_BLACK);
 				newparticle(state,flare->base.x+(FLARE_SIZE/2.0f),flare->base.y+(FLARE_SIZE/2.0f),10,COLOR_RED);
 				flare=deleteflare(state,flare,prevflare);
@@ -379,6 +390,7 @@ int core(struct state *state){
 		}
 		if(stop)continue;
 		if(collide(&state->player.base,&flare->base)&&!state->player.dead&&!state->player.success){
+			if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 			newparticle(state,flare->base.x+(FLARE_SIZE/2.0f),flare->base.y+(FLARE_SIZE/2.0f),30,COLOR_RED);
 			flare=deleteflare(state,flare,prevflare);
 			if(!state->player.dead){
@@ -414,6 +426,7 @@ int core(struct state *state){
 		if(missile->ttl<MISSILE_TTL-60){
 			if(collide(&missile->base,&state->player.base)&&!state->player.dead&&!state->player.success){
 				if(state->vibenabled)vibratedevice(&state->jni_info,VIB_LENGTH);
+				if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),30,COLOR_BLACK);
 				missile=deletemissile(state,missile,prevmissile);
 				if(!state->player.dead)state->player.dead=true;
@@ -426,6 +439,7 @@ int core(struct state *state){
 				}
 				for(int i=0;i<BLOCK_COUNT;++i){
 					if(collide(&state->block[i].base,&missile->base)&&!state->block[i].hidden){
+						if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 						newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30,COLOR_BLACK);
 						missile=deletemissile(state,missile,prevmissile);
 						stop=true;
@@ -443,6 +457,7 @@ int core(struct state *state){
 				missile->yv+=GRAVITY/2.7f;
 				for(int i=0;i<BLOCK_COUNT;++i){
 					if(collide(&state->block[i].base,&missile->base)&&!state->block[i].hidden){
+						if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 						newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),state->block[i].base.y,30,COLOR_BLACK);
 						missile=deletemissile(state,missile,prevmissile);
 						stop=true;
@@ -454,6 +469,7 @@ int core(struct state *state){
 		}
 		for(struct flare *flare=state->flarelist,*prevflare=NULL;flare!=NULL;){
 			if(collide(&missile->base,&flare->base)){
+				if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 				newparticle(state,flare->base.x+(FLARE_SIZE/2.0f),flare->base.y+(FLARE_SIZE/2.0f),30,COLOR_RED);
 				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_WIDTH/2.0f),30,COLOR_BLACK);
 				flare=deleteflare(state,flare,prevflare);
@@ -472,6 +488,7 @@ int core(struct state *state){
 				continue;
 			}
 			if(collide(&missile->base,&missile2->base)){
+				if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),30,COLOR_BLACK);
 				newparticle(state,missile2->base.x+(MISSILE_WIDTH/2.0f),missile2->base.y+(MISSILE_HEIGHT/2.0f),30,COLOR_BLACK);
 				missile->dead=true;
@@ -502,6 +519,7 @@ int core(struct state *state){
 		}
 		if(state->player.lives<3&&collide(&life->base,&state->player.base)&&life->yv>0.0f){
 			++state->player.lives;
+			if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_BOOM,false);
 			newparticle(state,life->base.x+(LIFE_SIZE/2.0f),life->base.y+(LIFE_SIZE/2.0f),20,COLOR_BLACK);
 			life=deletelife(state,life,prevlife);
 			continue;
@@ -583,6 +601,7 @@ int core(struct state *state){
 		}
 	}
 	if((state->fbuttonstate=pointing(state->pointer,&state->fbutton))&&!state->player.reload&&!state->player.dead&&!state->player.success){
+		if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_LASER,false);
 		newblast(state);
 	}
 	if((state->pbuttonstate=buttonprocess(state,&state->pbutton))==BUTTON_ACTIVATE||state->back){

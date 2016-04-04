@@ -40,7 +40,10 @@
 #define TID_GAMEOVER 5
 
 // sound
-#define SID_THEME 0
+#define SID_SILENCE 0
+#define SID_THEME 1
+#define SID_LASER 2
+#define SID_BOOM 3
 
 struct base{
 	float x,y,w,h,rot,count;
@@ -236,6 +239,7 @@ int core(struct state*);
 void render(struct state*);
 
 int pointing(struct crosshair*,struct base*);
+int inrange(struct base*,struct base*,float);
 int buttonprocess(struct state*,struct button*);
 int buttondraw(struct state*,struct button*);
 void buttondrawtext(ftfont*,struct button*);

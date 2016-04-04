@@ -143,6 +143,9 @@ int pointing1(struct crosshair *pointer,struct base *base){
 int pointing(struct crosshair *pointer,struct base *base){
 	return pointing0(pointer,base)||pointing1(pointer,base);
 }
+int inrange(struct base *a,struct base *b,float range){
+	return fabs((a->x+(a->w/2.0f))-(b->x+(b->w/2.0f)))<range;
+}
 
 int collide(struct base *a,struct base *b){
 	return a->x+a->w>b->x&&a->x<b->x+b->w&&a->y+a->h>b->y&&a->y<b->y+b->h;

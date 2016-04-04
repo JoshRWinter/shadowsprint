@@ -56,6 +56,7 @@ void init_display(struct state *state){
 	loadapack(&state->aassets,state->app->activity->assetManager,"aassets");
 	state->soundengine=initOpenSL();
 	if(state->musicenabled)playsound(state->soundengine,state->aassets.sound+SID_THEME,true);
+	else playsound(state->soundengine,state->aassets.sound+SID_SILENCE,true);
 }
 void term_display(struct state *state){
 	state->running=false;

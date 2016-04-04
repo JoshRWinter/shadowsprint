@@ -134,11 +134,12 @@ int menu_conf(struct state *state){
 		
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(buttondraw(state,&musicbutton)==BUTTON_ACTIVATE){
+			stopallsounds(state->soundengine);
 			if(state->musicenabled=!state->musicenabled){
 				playsound(state->soundengine,state->aassets.sound+SID_THEME,true);
 			}
 			else{
-				stopallsounds(state->soundengine);
+				playsound(state->soundengine,state->aassets.sound+SID_SILENCE,true);
 			}
 			changed=true;
 		}

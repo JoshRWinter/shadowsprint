@@ -1,1 +1,1 @@
-legionella.ogg -o ..\assets\aassets
+silence.ogg legionella.ogg laser.ogg boom.ogg -o ..\assets\aassets
