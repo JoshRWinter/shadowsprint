@@ -449,7 +449,19 @@ int core(struct state *state){
 				if(stop)continue;
 			}
 		}
-		
+		for(struct flare *flare=state->flarelist,*prevflare=NULL;flare!=NULL;){
+			if(collide(&missile->base,&flare->base)){
+				newparticle(state,flare->base.x+(FLARE_SIZE/2.0f),flare->base.y+(FLARE_SIZE/2.0f),30,COLOR_RED);
+				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_WIDTH/2.0f),30,COLOR_BLACK);
+				flare=deleteflare(state,flare,prevflare);
+				missile=deletemissile(state,missile,prevmissile);
+				stop=true;
+				break;
+			}
+			prevflare=flare;
+			flare=flare->next;
+		}
+		if(stop)continue;
 		for(struct missile *missile2=state->missilelist,*prevmissile2=NULL;missile2!=NULL;){
 			if(missile==missile2){
 				prevmissile2=missile2;
