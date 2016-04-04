@@ -2,7 +2,7 @@
 #define DATAPATH "/data/data/joshwinter.shadow/files/"
 #define PI 3.14159f
 #define PI2 (2.0f*PI)
-#define TEX_MODE "11011011111"
+#define TEX_MODE "110110111111"
 #define COLLIDE_RIGHT 1
 #define COLLIDE_TOP 2
 #define COLLIDE_LEFT 3
@@ -29,6 +29,7 @@
 #define TID_MISSILE 8
 #define TID_DUST 9
 #define TID_TELEPORTER 10
+#define TID_LIFE 11
 
 // ui
 #define TID_BACKGROUND 0
@@ -153,6 +154,15 @@ struct missile{
 	struct missile *next;
 };
 
+#define LIFE_SIZE 1.0f
+#define LIFE_PROBABILITY 1
+struct life{
+	struct base base;
+	float xv,yv;
+	int frame;
+	struct life *next;
+};
+
 #define CLOUD_WIDTH 4.5f
 #define CLOUD_HEIGHT 3.0f
 #define CLOUD_BOUND -12.0f
@@ -212,6 +222,7 @@ struct state{
 	struct flare *flarelist;
 	struct silo *silolist;
 	struct missile *missilelist;
+	struct life *lifelist;
 	struct cloud *cloudlist;
 	struct dust *dustlist;
 };
@@ -267,5 +278,7 @@ void newsilo(struct state*,int);
 struct silo *deletesilo(struct state*,struct silo*,struct silo*);
 void newmissile(struct state*,struct silo*);
 struct missile *deletemissile(struct state*,struct missile*,struct missile*);
+void newlife(struct state*,struct enemy*);
+struct life *deletelife(struct state*,struct life*,struct life*);
 void newcloud(struct state*);
 struct cloud *deletecloud(struct state*,struct cloud*,struct cloud*);

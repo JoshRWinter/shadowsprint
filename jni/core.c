@@ -149,6 +149,7 @@ int core(struct state *state){
 		side=state->player.dead?0:correct(&state->player.base,&enemy->base);
 		if(side==COLLIDE_TOP){
 			newparticle(state,enemy->base.x+(ENEMY_WIDTH/2.0f),enemy->base.y+(ENEMY_HEIGHT/2.0f),20,COLOR_BLACK);
+			if(onein(LIFE_PROBABILITY))newlife(state,enemy);
 			enemy=deleteenemy(state,enemy,prevenemy);
 			state->player.text.timer=PHRASE_TIMER;
 			state->player.text.phrase=getplayerstompphrase();
@@ -162,6 +163,7 @@ int core(struct state *state){
 		}
 		for(struct blast *blast=state->blastlist,*prevblast=NULL;blast!=NULL;){
 			if(collide(&blast->base,&enemy->base)){
+				if(onein(LIFE_PROBABILITY))newlife(state,enemy);
 				newparticle(state,blast->base.x+(BLAST_WIDTH/2.0f),blast->base.y+(BLAST_HEIGHT/2.0f),20,COLOR_BLACK);
 				blast=deleteblast(state,blast,prevblast);
 				enemy=deleteenemy(state,enemy,prevenemy);
@@ -485,6 +487,48 @@ int core(struct state *state){
 		missile=missile->next;
 	}
 	
+	for(struct life *life=state->lifelist,*prevlife=NULL;life!=NULL;){
+		if(life->base.y+LIFE_SIZE>LAVA_Y)life->yv=0.03f;
+		if(++life->frame>60)life->frame=0;
+		life->base.x+=life->xv;
+		life->base.y+=life->yv;
+		zerof(&life->xv,0.002f);
+		life->yv+=GRAVITY;
+		life->base.rot+=life->xv/1.1f;
+		if(life->base.y>state->rect.bottom){
+			life=deletelife(state,life,prevlife);
+			continue;
+		}
+		if(state->player.lives<3&&collide(&life->base,&state->player.base)&&life->yv>0.0f){
+			++state->player.lives;
+			newparticle(state,life->base.x+(LIFE_SIZE/2.0f),life->base.y+(LIFE_SIZE/2.0f),20,COLOR_BLACK);
+			life=deletelife(state,life,prevlife);
+			continue;
+		}
+		for(int i=0;i<BLOCK_COUNT;++i){
+			if(state->block[i].hidden)continue;
+			int side=correct(&life->base,&state->block[i].base);
+			switch(side){
+				case COLLIDE_TOP:
+					if(fabs(life->yv/=-1.9f)<0.05)life->yv=0.0f;
+					life->base.y=state->block[i].base.y-LIFE_SIZE;
+					break;
+				case COLLIDE_LEFT:
+					if(life->xv<0.0f)break;
+					life->xv=-life->xv;
+					life->base.x=state->block[i].base.x-LIFE_SIZE;
+					break;
+				case COLLIDE_RIGHT:
+					if(life->xv>0.0f)break;
+					life->xv=-life->xv;
+					life->base.x=state->block[i].base.x+state->block[i].base.w;
+					break;
+			}
+		}
+		prevlife=life;
+		life=life->next;
+	}
+	
 	int cloudcount=0;
 	for(struct cloud *cloud=state->cloudlist,*prevcloud=NULL;cloud!=NULL;){
 		++cloudcount;
@@ -606,6 +650,12 @@ void render(struct state *state){
 		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_SILO].object);
 		for(struct silo *silo=state->silolist;silo!=NULL;silo=silo->next)
 			draw(state,&silo->base,0.0f,false);
+	}
+	
+	if(state->lifelist){
+		glBindTexture(GL_TEXTURE_2D,state->assets.texture[TID_LIFE].object);
+		for(struct life *life=state->lifelist;life!=NULL;life=life->next)
+			draw(state,&life->base,life->frame>30?0.0f:1.0f,false);
 	}
 	
 	if(state->enemylist){
@@ -739,6 +789,7 @@ void init(struct state *state){
 	state->flarelist=NULL;
 	state->silolist=NULL;
 	state->missilelist=NULL;
+	state->lifelist=NULL;
 	state->cloudlist=NULL;
 	state->dustlist=NULL;
 }
@@ -757,6 +808,7 @@ void reset_level(struct state *state){
 	for(struct flare *flare=state->flarelist;flare!=NULL;flare=deleteflare(state,flare,NULL));
 	for(struct silo *silo=state->silolist;silo!=NULL;silo=deletesilo(state,silo,NULL));
 	for(struct missile *missile=state->missilelist;missile!=NULL;missile=deletemissile(state,missile,NULL));
+	for(struct life *life=state->lifelist;life!=NULL;life=deletelife(state,life,NULL));
 	for(struct cloud *cloud=state->cloudlist;cloud!=NULL;cloud=deletecloud(state,cloud,NULL));
 	for(struct dust *dust=state->dustlist;dust!=NULL;dust=deletedust(state,dust,NULL));
 	newblocks(state);

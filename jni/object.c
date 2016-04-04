@@ -231,6 +231,29 @@ struct missile *deletemissile(struct state *state,struct missile *missile,struct
 	return temp;
 }
 
+void newlife(struct state *state,struct enemy *enemy){
+	//if(state->player.lives>2)return;
+	struct life *life=malloc(sizeof(struct life));
+	life->base.w=LIFE_SIZE;
+	life->base.h=LIFE_SIZE;
+	life->base.x=enemy->base.x+(ENEMY_WIDTH/2.0f)-(LIFE_SIZE/2.0f);
+	life->base.y=enemy->base.y+(ENEMY_HEIGHT/2.0f)-(LIFE_SIZE/2.0f);
+	life->base.rot=torad(randomint(1,360));
+	life->base.count=2.0f;
+	life->frame=0;
+	life->xv=enemy->xv>0.0f?0.13f:-0.13f;
+	life->yv=-0.13f;
+	life->next=state->lifelist;
+	state->lifelist=life;
+}
+struct life *deletelife(struct state *state,struct life *life,struct life *prevlife){
+	if(prevlife!=NULL)prevlife->next=life->next;
+	else state->lifelist=life->next;
+	void *temp=life->next;
+	free(life);
+	return temp;
+}
+
 void newdust(struct state *state){
 	struct dust *dust=malloc(sizeof(struct dust));
 	dust->base.w=randomint(12,90)/100.0f;
