@@ -14,6 +14,7 @@
 #define COLOR_NIGHT 0.75f,0.0f,1.0f,1.0f
 #define COLOR_MORNIN 1.0f,0.45f,0.6f,1.0f
 #define PHRASE_TIMER 200
+#define VIB_LENGTH 400
 #define torad(x) (x*(PI/180.0f))
 
 // gameplay

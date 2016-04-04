@@ -70,7 +70,10 @@ int core(struct state *state){
 	state->player.base.y+=state->player.yv;
 	state->player.base.x+=state->player.xv;
 	if(state->player.base.y+PLAYER_HEIGHT>LAVA_Y){
-		if(!state->player.dead)state->player.dead=true;
+		if(!state->player.dead){
+			if(state->vibenabled)vibratedevice(&state->jni_info,VIB_LENGTH);
+			state->player.dead=true;
+		}
 		state->player.yv=0.005f;
 		targetf(&state->player.base.rot,0.05,PI/4.0f);
 	}
@@ -152,7 +155,10 @@ int core(struct state *state){
 			continue;
 		}
 		else if(side==COLLIDE_LEFT||side==COLLIDE_RIGHT){
-			if(!state->player.dead&&!state->player.success)state->player.dead=true;
+			if(!state->player.dead&&!state->player.success){
+				if(state->vibenabled)vibratedevice(&state->jni_info,VIB_LENGTH);
+				state->player.dead=true;
+			}
 		}
 		for(struct blast *blast=state->blastlist,*prevblast=NULL;blast!=NULL;){
 			if(collide(&blast->base,&enemy->base)){
@@ -372,7 +378,10 @@ int core(struct state *state){
 		if(collide(&state->player.base,&flare->base)&&!state->player.dead&&!state->player.success){
 			newparticle(state,flare->base.x+(FLARE_SIZE/2.0f),flare->base.y+(FLARE_SIZE/2.0f),30,COLOR_RED);
 			flare=deleteflare(state,flare,prevflare);
-			if(!state->player.dead)state->player.dead=true;
+			if(!state->player.dead){
+				if(state->vibenabled)vibratedevice(&state->jni_info,VIB_LENGTH);
+				state->player.dead=true;
+			}
 			continue;
 		}
 		prevflare=flare;
@@ -401,6 +410,7 @@ int core(struct state *state){
 		int stop=false;
 		if(missile->ttl<MISSILE_TTL-60){
 			if(collide(&missile->base,&state->player.base)&&!state->player.dead&&!state->player.success){
+				if(state->vibenabled)vibratedevice(&state->jni_info,VIB_LENGTH);
 				newparticle(state,missile->base.x+(MISSILE_WIDTH/2.0f),missile->base.y+(MISSILE_HEIGHT/2.0f),30,COLOR_BLACK);
 				missile=deletemissile(state,missile,prevmissile);
 				if(!state->player.dead)state->player.dead=true;
