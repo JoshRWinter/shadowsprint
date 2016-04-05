@@ -38,6 +38,7 @@
 #define TID_SYMBOL 3
 #define TID_VICTORY 4
 #define TID_GAMEOVER 5
+#define TID_TUTORIAL 6
 
 // sound
 #define SID_SILENCE 0
@@ -250,6 +251,7 @@ int correct(struct base*,struct base*);
 int menu_main(struct state*);
 int menu_pause(struct state*);
 int menu_conf(struct state*);
+int menu_tutorial(struct state*);
 int menu_gameover(struct state*);
 int menu_victory(struct state*);
 int menu_message(struct state*,const char*,const char*,int*);

@@ -783,6 +783,7 @@ void init(struct state *state){
 		state->soundenabled=true;
 		state->vibenabled=true;
 		state->showtut=true;
+		saveconf(state);
 	}
 	else state->showtut=false;
 	state->skycolor=1;

@@ -27,6 +27,12 @@ int menu_main(struct state *state){
 		dustrender(state);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(buttondraw(state,&playbutton)==BUTTON_ACTIVATE){
+			if(state->showtut){
+				state->showtut=false;
+				int yesno=false;
+				if(!menu_message(state,"Show Tutorial?","\n\nWould you like to see the tutorial?",&yesno))return false;
+				if(yesno&&!menu_tutorial(state))return false;
+			}
 			state->enablewhiteout=true;
 			play=true;
 		}
@@ -183,6 +189,30 @@ int menu_conf(struct state *state){
 	return false;
 }
 
+int menu_tutorial(struct state *state){
+	struct button backbutton={{5.8f,-BUTTON_HEIGHT/2.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Back",false};
+	while(process(state->app)){
+		glClear(GL_COLOR_BUFFER_BIT);
+		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
+		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BACKGROUND].object);
+		uidraw(state,&state->background,0.0f);
+		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTONFRAME].object);
+		uidraw(state,&state->buttonframe,0.0f);
+		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_TUTORIAL].object);
+		uidraw(state,&state->background,0.0f);
+		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
+		if(buttondraw(state,&backbutton)==BUTTON_ACTIVATE||state->back){
+			state->back=false;
+			return true;
+		}
+		glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
+		glBindTexture(GL_TEXTURE_2D,state->font.main->atlas);
+		buttondrawtext(state->font.main,&backbutton);
+		eglSwapBuffers(state->display,state->surface);
+	}
+	return false;
+}
+
 int menu_gameover(struct state *state){
 	struct base base={state->rect.left,state->rect.top,state->rect.right*2.0f,state->rect.bottom*2.0f,0.0f,1.0f};
 	int timer=70;
@@ -202,6 +232,8 @@ int menu_gameover(struct state *state){
 			}
 			active=state->pointer[0].active;
 		}
+		dustroutine(state);
+		dustrender(state);
 		whiteout(state);
 		eglSwapBuffers(state->display,state->surface);
 	}
@@ -227,6 +259,8 @@ int menu_victory(struct state *state){
 			}
 			active=state->pointer[0].active;
 		}
+		dustroutine(state);
+		dustrender(state);
 		whiteout(state);
 		eglSwapBuffers(state->display,state->surface);
 	}
@@ -236,7 +270,7 @@ int menu_victory(struct state *state){
 int menu_message(struct state *state,const char *caption,const char *msg,int *yesno){
 	struct button okbutton={{5.8f,-BUTTON_HEIGHT/2.0f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Mmkay",false};
 	struct button yesbutton={{5.8f,-2.0,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"Yes",false};
-	struct button nobutton={{4.5f,0.25f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"No",false};
+	struct button nobutton={{5.8f,0.25f,BUTTON_WIDTH,BUTTON_HEIGHT,0.0f,2.0f},"No",false};
 	while(process(state->app)){
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
