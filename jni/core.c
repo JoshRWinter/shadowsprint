@@ -33,11 +33,15 @@ int core(struct state *state){
 		}
 		else if(state->player.dead>PLAYER_DEAD_TIMER/1.5){
 			if(state->player.lives==1){
+				int level=state->level;
 				reset(state);
 				state->whiteout=1.0f;
 				state->showmenu=true;
 				if(!menu_gameover(state))return false;
-				return core(state);
+				state->level=level;
+				if(!core(state))return false;
+				state->level=1;
+				return true;
 			}
 			targetf(&state->player.base.x,fabs(state->player.base.x-(state->block[state->player.lastblock].base.x+(state->block[state->player.lastblock].base.w/2.0f)))/10.0f+0.01f,(state->block[state->player.lastblock].base.x+(state->block[state->player.lastblock].base.w/2.0f)));
 		}
@@ -59,7 +63,10 @@ int core(struct state *state){
 				state->enablewhiteout=true;
 				state->showmenu=true;
 				if(!menu_victory(state))return false;
-				return core(state);
+				state->level=3;
+				if(!core(state))return false;
+				state->level=1;
+				return true;
 			}
 			reset_level(state);
 		}
@@ -720,6 +727,7 @@ void render(struct state *state){
 	
 	dustrender(state);
 	
+	setbuttoncolor(state);
 	glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 	uidraw(state,&state->lbutton,state->lbuttonstate);
 	uidraw(state,&state->rbutton,state->rbuttonstate);
@@ -750,7 +758,6 @@ void render(struct state *state){
 	char livestext[20];
 	sprintf(livestext,"Lives: %d",state->player.lives);
 	drawtextcentered(state->font.main,0.0f,state->rect.top+0.2f,livestext);
-	
 	
 	glUniform4f(state->uniform.rgba,1.0f,1.0f,1.0f,1.0f);
 	glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_SYMBOL].object);

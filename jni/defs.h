@@ -239,6 +239,7 @@ void reset_player(struct state*);
 int core(struct state*);
 void render(struct state*);
 
+void setbuttoncolor(struct state*);
 int pointing(struct crosshair*,struct base*);
 int inrange(struct base*,struct base*,float);
 int buttonprocess(struct state*,struct button*);

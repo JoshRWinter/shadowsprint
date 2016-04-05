@@ -47,6 +47,20 @@ const char *getplayerresphrase(){
 	return playerresphrase[randomint(0,4)];
 }
 
+void setbuttoncolor(struct state *state){
+	switch(state->level){
+		case 1:
+			glUniform4f(state->uniform.rgba,COLOR_WHITE);
+			break;
+		case 2:
+			glUniform4f(state->uniform.rgba,COLOR_NIGHT);
+			break;
+		case 3:
+			glUniform4f(state->uniform.rgba,COLOR_MORNIN);
+			break;
+	}
+}
+
 void whiteout(struct state *state){
 	const float FADE=0.015f;
 	struct base base={state->rect.left,state->rect.top,state->rect.right*2.0f,state->rect.bottom*2.0f,0.0f,1.0f};

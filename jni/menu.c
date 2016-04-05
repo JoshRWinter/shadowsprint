@@ -25,6 +25,7 @@ int menu_main(struct state *state){
 		uidraw(state,&state->buttonframe,0);
 		dustroutine(state);
 		dustrender(state);
+		setbuttoncolor(state);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(buttondraw(state,&playbutton)==BUTTON_ACTIVATE){
 			if(state->showtut){
@@ -80,6 +81,7 @@ int menu_pause(struct state *state){
 		dustroutine(state);
 		dustrender(state);
 		
+		setbuttoncolor(state);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(buttondraw(state,&resetbutton)==BUTTON_ACTIVATE){
 			reset(state);
@@ -138,6 +140,7 @@ int menu_conf(struct state *state){
 		dustroutine(state);
 		dustrender(state);
 		
+		setbuttoncolor(state);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(buttondraw(state,&musicbutton)==BUTTON_ACTIVATE){
 			stopallsounds(state->soundengine);
@@ -200,6 +203,7 @@ int menu_tutorial(struct state *state){
 		uidraw(state,&state->buttonframe,0.0f);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_TUTORIAL].object);
 		uidraw(state,&state->background,0.0f);
+		setbuttoncolor(state);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(buttondraw(state,&backbutton)==BUTTON_ACTIVATE||state->back){
 			state->back=false;
@@ -280,6 +284,7 @@ int menu_message(struct state *state,const char *caption,const char *msg,int *ye
 		uidraw(state,&state->buttonframe,0);
 		dustroutine(state);
 		dustrender(state);
+		setbuttoncolor(state);
 		glBindTexture(GL_TEXTURE_2D,state->uiassets.texture[TID_BUTTON].object);
 		if(yesno){
 			if(buttondraw(state,&yesbutton)==BUTTON_ACTIVATE){
