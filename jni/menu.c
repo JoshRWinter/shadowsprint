@@ -6,7 +6,7 @@
 int menu_main(struct state *state){
 	//vibratedevice(&state->jni_info,30);
 	const char *aboottext=
-	"-- Shadow Sprint --\nProgrammed by Josh Winter\n-- Fonts --\nCorbel, BAUHAUS93\n-- Music --\nCoffee-Break - Legionella\n"
+	"-- Shadow Sprint --\nProgrammed by Josh Winter\n-- Fonts --\nCorbel, Radio Space\n-- Music --\nCoffee-Break - Legionella\n"
 	"Coffee-Break.newgrounds.com";
 	const float bleftoffset=5.8f;
 	const float btopoffset=-4.175f;
@@ -88,7 +88,7 @@ int menu_pause(struct state *state){
 			return true;
 		}
 		if(buttondraw(state,&tutorialbutton)==BUTTON_ACTIVATE){
-			// tutorial
+			if(!menu_tutorial(state))return false;
 		}
 		if(buttondraw(state,&mainmenubutton)==BUTTON_ACTIVATE){
 			state->showmenu=true;
