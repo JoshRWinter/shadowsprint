@@ -651,7 +651,7 @@ void render(struct state *state){
 		if(!state->block[i].hidden)draw(state,&state->block[i].base,0,false);
 		/*else{
 			glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,0.3f);
-			draw(state,&state->block[i].base,0);
+			draw(state,&state->block[i].base,0,0);
 			glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
 		}*/
 	}
@@ -769,7 +769,8 @@ void render(struct state *state){
 	
 	if(state->enablewhiteout||state->whiteout>0.0f)whiteout(state);
 	
-	/*{
+	#ifdef SHOW_FPS
+	{
 		static int fps,lasttime=0;
 		static char fpsstring[20];
 		if(lasttime!=time(NULL)){
@@ -781,7 +782,8 @@ void render(struct state *state){
 		glUniform4f(state->uniform.rgba,0.0f,0.0f,0.0f,1.0f);
 		glBindTexture(GL_TEXTURE_2D,state->font.main->atlas);
 		drawtext(state->font.main,state->rect.left+3.0f,state->rect.top+0.1f,fpsstring);
-	}*/
+	}
+	#endif
 }
 
 void init(struct state *state){

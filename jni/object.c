@@ -39,7 +39,7 @@ void newenemy(struct state *state,int index){
 	struct enemy *enemy=malloc(sizeof(struct enemy));
 	enemy->base.w=ENEMY_WIDTH;
 	enemy->base.h=ENEMY_HEIGHT;
-	enemy->base.x=state->block[index].base.x;
+	enemy->base.x=randomint(state->block[index].base.x*10.0f,(state->block[index].base.x+state->block[index].base.w-PLAYER_WIDTH)*10.0f)/10.0f;
 	enemy->base.y=state->block[index].base.y-ENEMY_HEIGHT;
 	enemy->base.rot=0.0f;
 	enemy->base.count=1.0f;

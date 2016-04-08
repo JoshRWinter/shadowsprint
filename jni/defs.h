@@ -16,6 +16,7 @@
 #define PHRASE_TIMER 200
 #define VIB_LENGTH 400
 #define torad(x) (x*(PI/180.0f))
+//#define SHOW_FPS
 
 // gameplay
 #define TID_PLAYER 0
@@ -85,7 +86,7 @@ struct enemy{
 	struct enemy *next;
 };
 
-#define BLOCK_COUNT 40
+#define BLOCK_COUNT 46
 struct block{
 	struct base base;
 	int hidden;
