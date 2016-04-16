@@ -3,26 +3,26 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE := freetype
 ifeq "$(TARGET_ARCH_ABI)" "armeabi-v7a-hard"
-	LOCAL_SRC_FILES := c:/users/josh/desktop/android/freetype-2.5.3-armeabi-v7a-hard/objs/freetype.a
+	LOCAL_SRC_FILES := ../../freetype-2.5.3/objs/freetype-armeabi-v7a-hard.a
 else ifeq "$(TARGET_ARCH_ABI)" "x86"
-	LOCAL_SRC_FILES := c:/users/josh/desktop/android/freetype-2.5.3-x86/objs/freetype.a
+	LOCAL_SRC_FILES := ../../freetype-2.5.3/objs/freetype-x86.a
 endif
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := ogg-vorbis
 ifeq "$(TARGET_ARCH_ABI)" "armeabi-v7a-hard"
-	LOCAL_SRC_FILES := c:/users/josh/desktop/android/libogg-1.3.2-armeabi-v7a-hard/src/ogg-vorbis.a
+	LOCAL_SRC_FILES := ../../libogg-1.3.2/lib/ogg-vorbis-armeabi-v7a-hard.a
 else ifeq "$(TARGET_ARCH_ABI)" "x86"
-	LOCAL_SRC_FILES := c:/users/josh/desktop/android/libogg-1.3.2-x86/src/ogg-vorbis.a
+	LOCAL_SRC_FILES := ../../libogg-1.3.2/lib/ogg-vorbis-x86.a
 endif
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := main
-LOCAL_C_INCLUDES := c:/users/josh/desktop/android/freetype-2.5.3-armeabi-v7a-hard/include
-LOCAL_C_INCLUDES += c:/Users/Josh/Desktop/Android/libogg-1.3.2-armeabi-v7a-hard/include
-LOCAL_C_INCLUDES += c:/Users/Josh/Desktop/Android/libvorbis-1.3.4-armeabi-v7a-hard/include
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../freetype-2.5.3/include
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../libogg-1.3.2/include
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../libvorbis-1.3.4/include
 LOCAL_SRC_FILES := glesutil.c main.c core.c object.c utility.c menu.c shader.c
 LOCAL_LDLIBS := -llog -landroid -lEGL -lGLESv2 -lz -lOpenSLES
 LOCAL_CFLAGS := -std=c99 -O2
