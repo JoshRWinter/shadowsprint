@@ -1,1 +1,1 @@
-background.tga button.tga button_frame.tga symbols.tga victory.tga gameover.tga tutorial.tga -o ..\assets\uiassets
+background.tga button.tga button_frame.tga symbols.tga victory.tga gameover.tga tutorial.tga -o ../assets/uiassets

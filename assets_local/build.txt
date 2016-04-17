@@ -1,1 +1,1 @@
-player.tga enemy.tga block.tga blast.tga shockwave.tga cloud.tga flare.tga silo.tga missile.tga dust.tga teleporter.tga life.tga -o ..\assets\assets
+player.tga enemy.tga block.tga blast.tga shockwave.tga cloud.tga flare.tga silo.tga missile.tga dust.tga teleporter.tga life.tga -o ../assets/assets

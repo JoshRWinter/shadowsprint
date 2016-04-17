@@ -13,3 +13,4 @@ all:../assets/assets ../assets/uiassets ../assets/aassets
 
 ../assets/aassets:../assets_local/apack.txt ../assets_local/*.ogg
 	cd ../assets_local/ && apack --build
+
