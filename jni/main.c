@@ -78,6 +78,8 @@ int32_t inputproc(struct android_app *app,AInputEvent *event){
 	struct state *state=app->userData;
 	int32_t type=AInputEvent_getType(event);
 	if(type==AINPUT_EVENT_TYPE_MOTION){
+		state->gamepad=false;
+		logcat("touchinput");
 		return retrieve_touchscreen_input(event,state->pointer,state->device.w,state->device.h,state->rect.right*2.0f,state->rect.bottom*2.0f);
 	}
 	else if(type==AINPUT_EVENT_TYPE_KEY){
@@ -90,6 +92,26 @@ int32_t inputproc(struct android_app *app,AInputEvent *event){
 		else if(key==AKEYCODE_MENU&&action==AKEY_EVENT_ACTION_UP){
 			reset(state);
 			return true;
+		}
+		else if(key==AKEYCODE_DPAD_UP){
+			state->gamepad=true;
+			if(action==AKEY_EVENT_ACTION_DOWN)state->dpad_right=true;
+			else if(action==AKEY_EVENT_ACTION_UP)state->dpad_right=false;
+		}
+		else if(key==AKEYCODE_DPAD_DOWN){
+			state->gamepad=true;
+			if(action==AKEY_EVENT_ACTION_DOWN)state->dpad_left=true;
+			else if(action==AKEY_EVENT_ACTION_UP)state->dpad_left=false;
+		}
+		else if(key==AKEYCODE_DPAD_LEFT){
+			state->gamepad=true;
+			if(action==AKEY_EVENT_ACTION_DOWN)state->dpad_up=true;
+			else if(action==AKEY_EVENT_ACTION_UP)state->dpad_up=false;
+		}
+		else if(key==AKEYCODE_DPAD_CENTER){
+			state->gamepad=true;
+			if(action==AKEY_EVENT_ACTION_DOWN)state->dpad_center=true;
+			else if(action==AKEY_EVENT_ACTION_UP)state->dpad_center=false;
 		}
 	}
 	return false;

@@ -197,6 +197,7 @@ struct button{
 
 struct state{
 	int running,showmenu,back,musicenabled,soundenabled,vibenabled,showtut,level,skycolor,enablewhiteout;
+	int dpad_right,dpad_left,dpad_up,dpad_center,gamepad;
 	float ensmallen,whiteout;
 	unsigned vao,vbo,program;
 	struct pack assets,uiassets;

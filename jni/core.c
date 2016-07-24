@@ -590,8 +590,8 @@ int core(struct state *state){
 	dustroutine(state);
 	
 	// buttons
-	state->lbuttonstate=pointing(state->pointer,&state->lbutton);
-	state->rbuttonstate=pointing(state->pointer,&state->rbutton);
+	state->lbuttonstate=pointing(state->pointer,&state->lbutton)||state->dpad_left;
+	state->rbuttonstate=pointing(state->pointer,&state->rbutton)||state->dpad_right;
 	if(state->lbuttonstate&&!state->player.dead&&!state->player.success){
 		state->player.xv-=PLAYER_ACCELERATE;
 		if(state->player.xv<-PLAYER_MAX_SPEED)state->player.xv=-PLAYER_MAX_SPEED;
@@ -601,13 +601,13 @@ int core(struct state *state){
 		if(state->player.xv>PLAYER_MAX_SPEED)state->player.xv=PLAYER_MAX_SPEED;
 	}
 	else zerof(&state->player.xv,PLAYER_ACCELERATE);
-	if(state->jbuttonstate=pointing(state->pointer,&state->jbutton)&&!state->player.dead&&!state->player.success){
+	if((state->jbuttonstate=pointing(state->pointer,&state->jbutton)||state->dpad_up)&&!state->player.dead&&!state->player.success){
 		if(state->player.canjump){
 			state->player.canjump=false;
 			state->player.yv=PLAYER_JUMP;
 		}
 	}
-	if((state->fbuttonstate=pointing(state->pointer,&state->fbutton))&&!state->player.reload&&!state->player.dead&&!state->player.success){
+	if((state->fbuttonstate=pointing(state->pointer,&state->fbutton)||state->dpad_center)&&!state->player.reload&&!state->player.dead&&!state->player.success){
 		if(state->soundenabled)playsound(state->soundengine,state->aassets.sound+SID_LASER,false);
 		newblast(state);
 	}
@@ -734,6 +734,7 @@ void render(struct state *state){
 	uidraw(state,&state->jbutton,state->jbuttonstate);
 	uidraw(state,&state->fbutton,state->fbuttonstate);
 	buttondraw(state,&state->pbutton);
+
 	
 	if(state->level==1)
 		glUniform4f(state->uniform.rgba,0.2f,0.2f,0.2f,1.0f);
@@ -795,6 +796,11 @@ void init(struct state *state){
 		saveconf(state);
 	}
 	else state->showtut=false;
+	state->dpad_left=false;
+	state->dpad_right=false;
+	state->dpad_up=false;
+	state->dpad_center=false;
+	state->gamepad=false;
 	state->skycolor=1;
 	state->enablewhiteout=false;
 	state->whiteout=0.0f;
