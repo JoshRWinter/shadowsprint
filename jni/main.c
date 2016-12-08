@@ -79,7 +79,6 @@ int32_t inputproc(struct android_app *app,AInputEvent *event){
 	int32_t type=AInputEvent_getType(event);
 	if(type==AINPUT_EVENT_TYPE_MOTION){
 		state->gamepad=false;
-		logcat("touchinput");
 		return retrieve_touchscreen_input(event,state->pointer,state->device.w,state->device.h,state->rect.right*2.0f,state->rect.bottom*2.0f);
 	}
 	else if(type==AINPUT_EVENT_TYPE_KEY){
