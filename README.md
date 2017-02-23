@@ -4,5 +4,7 @@ programming and art by josh winter
 
 music by http://Coffee-Break.newgrounds.com
 
-needs https://bitbucket.org/joshrwinter/abe (build dependencies)
+images:  
+[one](http://i.imgur.com/oRUUEnT.png)  
+[two](http://i.imgur.com/3Gq9N2O.png)  
 
